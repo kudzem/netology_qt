@@ -8,6 +8,7 @@
 #include <QtGlobal>
 #include <QtConcurrent>
 #include <algorithm>
+#include "chartform.h"
 
 ///Подключаем все что нужно для графиков
 #include <QLineSeries>
@@ -39,12 +40,22 @@ public:
     void DisplayResult(QVector<double> mins, QVector<double> maxs);
 
 
+signals:
+
+    void show_chart(QChartView* newchart);
 
 private slots:
     void on_pb_path_clicked();
     void on_pb_start_clicked();
 
 
+    void on_gb_result_clicked();
+
+    void fillChartData(QVector<double>& res);
+
+    void show_chart2();
+
+    void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -55,5 +66,10 @@ private:
     QVector<double> procesData;
     QVector<double> mins, maxs;
 
+    QChart* chart;
+    QChartView* chartView;
+    QLineSeries data_to_vizualize;
+
+    ChartForm* chartForm;
 };
 #endif // MAINWINDOW_H

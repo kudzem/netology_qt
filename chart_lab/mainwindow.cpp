@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "chartform.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -8,14 +9,48 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->pb_clearResult->setCheckable(true);
 
+    chart = new QChart();
+    chart->legend()->setVisible(false);
 
+    chartForm = new ChartForm();
+
+    chart->addSeries(&data_to_vizualize);
+    auto axisX = new QValueAxis;
+    axisX->setTickCount(1);
+    axisX->setRange(0, 1000);
+    chart->addAxis(axisX, Qt::AlignBottom);
+
+    auto axisY = new QValueAxis;
+    chart->addAxis(axisY, Qt::AlignLeft);
+
+    axisY->setRange(-1, 1);
+
+    data_to_vizualize.attachAxis(axisX);
+    data_to_vizualize.attachAxis(axisY);
+
+    chart->setTitle("ADC signal");
+
+    chartView = new QChartView(chart);
+
+    connect(this, &MainWindow::show_chart, chartForm, &ChartForm::show_chart);
 }
 
 MainWindow::~MainWindow()
 {
+    delete chartForm;
     delete ui;
 }
 
+void
+MainWindow::fillChartData(QVector<double>& res) {
+
+    data_to_vizualize.clear();
+
+    size_t s = res.size() < 1000 ? res.size() : 1000;
+    for(int i = 0; i < s; i++) {
+        data_to_vizualize.append(i,res[i]);
+    }
+}
 
 
 /****************************************************/
@@ -93,6 +128,7 @@ QVector<double> MainWindow::ProcessFile(const QVector<uint32_t> dataFile)
 
     foreach (int word, dataFile) {
         word &= 0x00FFFFFF;
+        //qDebug() << "word" << word;
         if(word > 0x800000){
             word -= 0x1000000;
         }
@@ -224,6 +260,10 @@ void MainWindow::on_pb_start_clicked()
                                                 mins = FindMin(res);
                                                 DisplayResult(mins, maxs);
 
+                                                fillChartData(res);
+
+                                                emit show_chart(chartView);
+
                                                 /*
                                                  * Тут необходимо реализовать код наполнения серии
                                                  * и вызов сигнала для отображения графика
@@ -239,4 +279,17 @@ void MainWindow::on_pb_start_clicked()
 
 }
 
+void MainWindow::show_chart2()
+{
+    chartForm->show_chart(chartView);
+    chartForm->show();
+}
+
+
+void MainWindow::on_pushButton_clicked()
+{
+    show_chart2();
+}
+
+void MainWindow::on_gb_result_clicked(){}
 
