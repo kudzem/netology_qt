@@ -9,21 +9,23 @@ ChartForm::ChartForm(QWidget *parent) :
     ui->setupUi(this);
     layout = new QGridLayout;
     ui->widget->setLayout(layout);
+    chartView = nullptr;
 }
 
 ChartForm::~ChartForm()
 {
-    if (_chartView)
-    layout->removeWidget(_chartView);
+    layout->removeWidget(chartView);
     delete layout;
     delete ui;
 }
 
 void
-ChartForm::show_chart(QChartView* chartView)
+ChartForm::show_chart(QChart* chart)
 {
-    _chartView = chartView;
+    if (chartView) delete chartView;
+    chartView = new QChartView(chart);
     layout->addWidget(chartView);
+
     chartView->show();
     show();
 }

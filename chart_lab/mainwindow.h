@@ -42,7 +42,7 @@ public:
 
 signals:
 
-    void show_chart(QChartView* newchart);
+    void show_chart(QChart* newchart);
 
 private slots:
     void on_pb_path_clicked();
@@ -67,7 +67,6 @@ private:
     QVector<double> mins, maxs;
 
     QChart* chart;
-    QChartView* chartView;
     QLineSeries data_to_vizualize;
 
     ChartForm* chartForm;

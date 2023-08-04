@@ -30,13 +30,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     chart->setTitle("ADC signal");
 
-    chartView = new QChartView(chart);
-
     connect(this, &MainWindow::show_chart, chartForm, &ChartForm::show_chart);
 }
 
 MainWindow::~MainWindow()
 {
+    //delete chart;
     delete chartForm;
     delete ui;
 }
@@ -262,7 +261,7 @@ void MainWindow::on_pb_start_clicked()
 
                                                 fillChartData(res);
 
-                                                emit show_chart(chartView);
+                                                emit show_chart(chart);
 
                                                 /*
                                                  * Тут необходимо реализовать код наполнения серии
@@ -281,7 +280,7 @@ void MainWindow::on_pb_start_clicked()
 
 void MainWindow::show_chart2()
 {
-    chartForm->show_chart(chartView);
+    chartForm->show_chart(chart);
     chartForm->show();
 }
 

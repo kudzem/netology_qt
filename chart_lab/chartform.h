@@ -19,12 +19,12 @@ public:
 
 public slots:
 
-    void show_chart(QChartView* chart);
+    void show_chart(QChart* chart);
 
 private:
     Ui::ChartForm *ui;
     QGridLayout *layout;
-    QChartView* _chartView;
+    QChartView* chartView;
 };
 
 #endif // CHARTFORM_H
