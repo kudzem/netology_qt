@@ -42,8 +42,6 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_pushButton_3_clicked()
 {
     stopWatch->reset();
-    ui->pushButton->setText("Старт");
-    ui->pushButton_2->setEnabled(false);
     ui->label->setText("00s00");
     ui->plainTextEdit->clear();
 }

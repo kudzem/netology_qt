@@ -29,8 +29,9 @@ StopWatch::stop() {
 
 void
 StopWatch::reset() {
-    stop();
     round_number=0;
+    interval_counter=0;
+    freezed_counter=0;
 }
 
 MyWatchRound
