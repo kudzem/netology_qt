@@ -42,7 +42,7 @@ public:
 
 signals:
 
-    void show_chart(QChart* newchart);
+    void show_chart(QChartView* newchart);
 
 private slots:
     void on_pb_path_clicked();
@@ -68,6 +68,7 @@ private:
 
     QChart* chart;
     QLineSeries data_to_vizualize;
+    QChartView* chartView;
 
     ChartForm* chartForm;
 };

@@ -19,7 +19,10 @@ public:
 
 public slots:
 
-    void show_chart(QChart* chart);
+    void show_chart(QChartView* chart);
+
+private slots:
+    void on_ChartForm_destroyed();
 
 private:
     Ui::ChartForm *ui;

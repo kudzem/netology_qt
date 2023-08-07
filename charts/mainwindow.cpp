@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     layout = new QGridLayout;
     ui->wid_chart->setLayout(layout);
     layout->addWidget(chartView);
-    chartView->show( );
+    chartView->show();
 
 }
 
