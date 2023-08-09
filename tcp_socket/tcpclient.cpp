@@ -159,6 +159,11 @@ void TCPclient::ReadyReed()
 
 void TCPclient::ProcessingData(ServiceHeader header, QDataStream &stream)
 {
+    if(header.status != STATUS_SUCCES) {
+        emit sig_Error(header.status);
+        return;
+    }
+
     switch (header.idData){
 
     case GET_TIME: {
@@ -186,7 +191,7 @@ void TCPclient::ProcessingData(ServiceHeader header, QDataStream &stream)
         break;
     }
         case CLEAR_DATA:
-        emit sig_sendDataCleared(header.status);
+        emit sig_Success(header.idData);
         default:
             return;
         }

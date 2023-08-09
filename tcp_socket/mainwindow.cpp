@@ -43,7 +43,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(client, &TCPclient::sig_sendStat, this, &MainWindow::DisplayStat);
     connect(client, &TCPclient::sig_sendFreeSize, this, &MainWindow::DisplayFreeSpace);
     connect(client, &TCPclient::sig_SendReplyForSetData, this, &MainWindow::SetDataReply);
-    connect(client, &TCPclient::sig_sendDataCleared, this, &MainWindow::DisplayClearingStatus);
+
+    connect(client, &TCPclient::sig_Error, this, &MainWindow::DisplayError);
+    connect(client, &TCPclient::sig_Success, this, &MainWindow::DisplaySuccess);
 }
 
 MainWindow::~MainWindow()
@@ -64,18 +66,7 @@ void MainWindow::DisplayFreeSpace(uint32_t freeSpace)
 }
 void MainWindow::SetDataReply(QString replyString)
 {
-    DisplaySuccess(SET_DATA);
-    ui->tb_result->append("data: " +  replyString);
-}
-
-void MainWindow::DisplayClearingStatus(uint16_t status)
-{
-    if (status == STATUS_SUCCES) {
-        DisplaySuccess(CLEAR_DATA);
-        return;
-    }
-
-    DisplayError(status);
+    ui->tb_result->append("Data set in server: " +  replyString);
 }
 
 void MainWindow::DisplayStat(StatServer stat)
@@ -89,8 +80,10 @@ void MainWindow::DisplayError(uint16_t error)
     switch (error) {
     case ERR_NO_FREE_SPACE:
         ui->tb_result->append("No free space");
+        break;
     case ERR_NO_FUNCT:
         ui->tb_result->append("Unsupported function");
+        break;
     default:
         break;
     }
@@ -104,9 +97,6 @@ void MainWindow::DisplaySuccess(uint16_t typeMess)
     switch (typeMess) {
     case CLEAR_DATA:
         ui->tb_result->append("Data has been cleared successfully");
-        break;
-    case SET_DATA:
-        ui->tb_result->append("Data has been set successfully");
         break;
     default:
         break;
