@@ -40,6 +40,7 @@ signals:
     void sig_sendStat(StatServer);
     void sig_sendTime(QDateTime);
     void sig_SendReplyForSetData(QString);
+    void sig_sendDataCleared(uint16_t);
     void sig_Error(uint16_t);
     void sig_connectStatus(uint16_t);
     void sig_Disconnected( void );

@@ -15,6 +15,7 @@ QDataStream &operator >>(QDataStream &out, ServiceHeader &data){
     out >> data.len;
     return out;
 };
+
 QDataStream &operator <<(QDataStream &in, ServiceHeader &data){
 
     in << data.id;
@@ -25,7 +26,16 @@ QDataStream &operator <<(QDataStream &in, ServiceHeader &data){
     return in;
 };
 
+QDataStream &operator >>(QDataStream &out, StatServer &stat){
 
+    out >> stat.incBytes;
+    out >> stat.sendBytes;
+    out >> stat.revPck;
+    out >> stat.sendPck;
+    out >> stat.workTime;
+    out >> stat.clients;
+    return out;
+};
 
 /*
  * Поскольку мы являемся клиентом, инициализацию сокета
@@ -47,8 +57,11 @@ TCPclient::TCPclient(QObject *parent) : QObject(parent)
 */
 void TCPclient::SendRequest(ServiceHeader head)
 {
+    QByteArray dataToSend;
+    QDataStream outStr(&dataToSend, QIODevice::WriteOnly);
+    outStr << head;
 
-
+    socket->write(dataToSend);
 }
 
 /* write
@@ -146,17 +159,36 @@ void TCPclient::ReadyReed()
 
 void TCPclient::ProcessingData(ServiceHeader header, QDataStream &stream)
 {
-
     switch (header.idData){
 
-        case GET_TIME:
-        case GET_SIZE:
-        case GET_STAT:
-        case SET_DATA:
+    case GET_TIME: {
+        QDateTime dateTime;
+        stream >> dateTime;
+        emit sig_sendTime(dateTime);
+        break;
+    }
+    case GET_SIZE: {
+        uint32_t freeSize;
+        stream >> freeSize;
+        emit sig_sendFreeSize(freeSize);
+        break;
+    }
+    case GET_STAT: {
+        StatServer stats;
+        stream >> stats;
+        emit sig_sendStat(stats);
+        break;
+    }
+    case SET_DATA:{
+        QString reply;
+        stream >> reply;
+        emit sig_SendReplyForSetData(reply);
+        break;
+    }
         case CLEAR_DATA:
+        emit sig_sendDataCleared(header.status);
         default:
             return;
-
         }
 
 }

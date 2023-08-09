@@ -25,6 +25,7 @@ private slots:
     void DisplayFreeSpace(uint32_t freeSpace);
     void SetDataReply(QString);
     void DisplayStat(StatServer);
+    void DisplayClearingStatus(uint16_t status);
     void DisplayConnectStatus(uint16_t status);
     void DisplayError(uint16_t error);
     void DisplaySuccess(uint16_t typeMess);

@@ -54,10 +54,21 @@ struct StatServer{
 
     uint32_t incBytes;  //принято байт
     uint32_t sendBytes; //передано байт
-    uint32_t revPck;    //принто пакетов
+    uint32_t revPck;    //принято пакетов
     uint32_t sendPck;   //передано пакетов
     uint32_t workTime;  //Время работы сервера секунд
     uint32_t clients;   //Количество подключенных клиентов
+
+    QString toString() {
+            QString res;
+            res += "Bytes received: " + QString::number(incBytes) + "\n";
+            res += "Bytes sent: " + QString::number(sendBytes) + "\n";
+            res += "Packets received: " + QString::number(revPck) + "\n";
+            res += "Packets sent: " + QString::number(sendPck) + "\n";
+            res += "Up time: " + QString::number(workTime) + " sec\n";
+            res += "Number of connected clients: " + QString::number(clients) + "\n";
+            return res;
+    }
 };
 
 

@@ -38,6 +38,12 @@ MainWindow::MainWindow(QWidget *parent)
  */
 
     connect(client, &TCPclient::sig_connectStatus, this, &MainWindow::DisplayConnectStatus);
+
+    connect(client, &TCPclient::sig_sendTime, this, &MainWindow::DisplayTime);
+    connect(client, &TCPclient::sig_sendStat, this, &MainWindow::DisplayStat);
+    connect(client, &TCPclient::sig_sendFreeSize, this, &MainWindow::DisplayFreeSpace);
+    connect(client, &TCPclient::sig_SendReplyForSetData, this, &MainWindow::SetDataReply);
+    connect(client, &TCPclient::sig_sendDataCleared, this, &MainWindow::DisplayClearingStatus);
 }
 
 MainWindow::~MainWindow()
@@ -50,25 +56,41 @@ MainWindow::~MainWindow()
  */
 void MainWindow::DisplayTime(QDateTime time)
 {
-
+    ui->tb_result->append(time.toString());
 }
 void MainWindow::DisplayFreeSpace(uint32_t freeSpace)
 {
-
+    ui->tb_result->append("Free space in server: " +  QString::number(freeSpace));
 }
 void MainWindow::SetDataReply(QString replyString)
 {
-
+    DisplaySuccess(SET_DATA);
+    ui->tb_result->append("data: " +  replyString);
 }
+
+void MainWindow::DisplayClearingStatus(uint16_t status)
+{
+    if (status == STATUS_SUCCES) {
+        DisplaySuccess(CLEAR_DATA);
+        return;
+    }
+
+    DisplayError(status);
+}
+
 void MainWindow::DisplayStat(StatServer stat)
 {
-
+    ui->tb_result->append("Stat:");
+    ui->tb_result->append(stat.toString());
 }
+
 void MainWindow::DisplayError(uint16_t error)
 {
     switch (error) {
     case ERR_NO_FREE_SPACE:
+        ui->tb_result->append("No free space");
     case ERR_NO_FUNCT:
+        ui->tb_result->append("Unsupported function");
     default:
         break;
     }
@@ -81,10 +103,14 @@ void MainWindow::DisplaySuccess(uint16_t typeMess)
 {
     switch (typeMess) {
     case CLEAR_DATA:
+        ui->tb_result->append("Data has been cleared successfully");
+        break;
+    case SET_DATA:
+        ui->tb_result->append("Data has been set successfully");
+        break;
     default:
         break;
     }
-
 }
 
 /*!
@@ -145,28 +171,42 @@ void MainWindow::on_pb_request_clicked()
    ServiceHeader header;
 
    header.id = ID;
-   header.status = STATUS_SUCCES;
    header.len = 0;
+   header.status = TYPE_REQ;
 
    switch (ui->cb_request->currentIndex()){
 
        //Получить время
        case 0:
+        header.idData = GET_TIME;
+        client->SendRequest(header);
+        break;
        //Получить свободное место
        case 1:
+        header.idData = GET_SIZE;
+        client->SendRequest(header);
+        break;
        //Получить статистику
        case 2:
+        header.idData = GET_STAT;
+        client->SendRequest(header);
+        break;
        //Отправить данные
        case 3:
+        header.idData = SET_DATA;
+        header.len = ui->le_data->text().size();
+        client->SendData(header,ui->le_data->text());
+        break;
        //Очистить память на сервере
        case 4:
+        header.idData = CLEAR_DATA;
+        client->SendRequest(header);
+        break;
        default:
        ui->tb_result->append("Такой запрос не реализован в текущей версии");
        return;
 
    }
-
-   client->SendRequest(header);
 
 }
 
