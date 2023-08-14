@@ -152,18 +152,17 @@ void DataBase::RequestAllFilms()
     model->setTable("film");
     model->select();
 
+    model->removeColumns(0,1);
+
+    for(int i = 0; i < 12; ++i) {
+        model->removeColumns(2,1);
+    }
+
     if (model->lastError().isValid())
         qDebug() << model->lastError();
 
-    model->setHeaderData(0, Qt::Horizontal, tr("Id"));
-    model->setHeaderData(1, Qt::Horizontal, tr("Название"));
-    model->setHeaderData(2, Qt::Horizontal, tr("Описание"));
-    model->setHeaderData(3, Qt::Horizontal, tr("Год выпуска"));
-    model->setHeaderData(4, Qt::Horizontal, tr("Язык"));
-    model->setHeaderData(5, Qt::Horizontal, tr("Оригинальный язык"));
-    model->setHeaderData(6, Qt::Horizontal, tr("Срок аренды"));
-    model->setHeaderData(7, Qt::Horizontal, tr("Цена"));
-    model->setHeaderData(8, Qt::Horizontal, tr("продолжительность"));
+    model->setHeaderData(0, Qt::Horizontal, tr("Название"));
+    model->setHeaderData(1, Qt::Horizontal, tr("Описание"));
 
     releaseLastModel();
     lastModel = model;

@@ -46,7 +46,6 @@ MainWindow::MainWindow(QWidget *parent)
      *  Сигнал для подключения к БД
      */
     connect(dataBase, &DataBase::sig_SendStatusConnection, this, &MainWindow::ReceiveStatusConnectionToDB);
-
 }
 
 MainWindow::~MainWindow()
@@ -159,6 +158,12 @@ void MainWindow::ScreenDataFromDB2(QAbstractItemModel *model)
     ui->tv_result->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tv_result->setModel(model);
     ui->tv_result->show();
+
+    // faster alternative to hide columns
+//    ui->tv_result->setColumnHidden(0,true);
+//    for(int i=3; i <=14 ; ++i) {
+//    ui->tv_result->setColumnHidden(3,true);
+//    }
 }
 
 /*!
