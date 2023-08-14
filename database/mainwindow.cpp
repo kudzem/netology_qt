@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include <QSqlError>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -38,7 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
     /*
      * Соединяем сигнал, который передает ответ от БД с методом, который отображает ответ в ПИ
      */
-     connect(dataBase, &DataBase::sig_SendDataFromDB, this, &MainWindow::ScreenDataFromDB);
+     //connect(dataBase, &DataBase::sig_SendDataFromDB, this, &MainWindow::ScreenDataFromDB);
+     connect(dataBase, &DataBase::sig_SendDataFromDB2, this, &MainWindow::ScreenDataFromDB2);
 
     /*
      *  Сигнал для подключения к БД
@@ -49,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    ui->tv_result->setModel(nullptr);
     delete ui;
 }
 
@@ -99,9 +102,15 @@ void MainWindow::on_act_connect_triggered()
  */
 void MainWindow::on_pb_request_clicked()
 {
-
-    ///Тут должен быть код ДЗ
-
+    if (ui->cb_category->itemText(ui->cb_category->currentIndex()) == "Все") {
+        dataBase->RequestFilms(filmRequestType_e::All);
+    }
+    else if (ui->cb_category->itemText(ui->cb_category->currentIndex()) == "Комедия") {
+        dataBase->RequestFilms(filmRequestType_e::Comedy);
+    }
+    else if (ui->cb_category->itemText(ui->cb_category->currentIndex()) == "Ужасы") {
+        dataBase->RequestFilms(filmRequestType_e::Horror);
+    }
 }
 
 /*!
@@ -109,13 +118,49 @@ void MainWindow::on_pb_request_clicked()
  * \param widget
  * \param typeRequest
  */
-void MainWindow::ScreenDataFromDB(const QTableWidget *widget, int typeRequest)
+//void MainWindow::ScreenDataFromDB(const QTableWidget *widget, int typeRequest)
+//{
+//    ///Тут должен быть код ДЗ
+//    ui->tb_result->clear();
+
+//    //delete widget;
+
+//    ui->tb_result->setRowCount(widget->rowCount());
+//    ui->tb_result->setColumnCount(widget->columnCount());
+
+//    qDebug() << "RowCount" << widget->rowCount();
+//    QStringList hdrs;
+//    for(int i = 0; i < widget->columnCount(); ++i){
+//        hdrs << widget->horizontalHeaderItem(i)->text();
+//    }
+//    ui->tb_result->setHorizontalHeaderLabels(hdrs);
+
+//    for(int i = 0; i<widget->rowCount(); ++i){
+//        for(int j = 0; j<widget->columnCount(); ++j){
+//            ui->tb_result->setItem(i,j, widget->item(i,j)->clone());
+//            //QTableWidgetItem *item = new QTableWidgetItem(widget->item(i,j)->text());
+//            //ui->tb_result->setItem(i,j, item);
+//        }
+//    }
+
+//    ui->tb_result->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+//}
+
+/*!
+ * \brief Слот отображает значение в QTableWidget
+ * \param widget
+ * \param typeRequest
+ */
+void MainWindow::ScreenDataFromDB2(QAbstractItemModel *model)
 {
-
     ///Тут должен быть код ДЗ
+    //ui->tv_result->clear();
 
-
+    ui->tv_result->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tv_result->setModel(model);
+    ui->tv_result->show();
 }
+
 /*!
  * \brief Метод изменяет стотояние формы в зависимости от статуса подключения к БД
  * \param status
@@ -140,4 +185,12 @@ void MainWindow::ReceiveStatusConnectionToDB(bool status)
 }
 
 
+
+
+void MainWindow::on_pb_clear_clicked()
+{
+    ui->tv_result->setModel(nullptr);
+    ui->tv_result->update();
+    dataBase->releaseLastModel();
+}
 

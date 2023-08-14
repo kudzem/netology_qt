@@ -38,6 +38,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="text">
+      <string>981757-ca08998.tmweb.ru</string>
+     </property>
     </widget>
    </item>
    <item row="1" column="0">
@@ -63,6 +66,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="text">
+      <string>netology_cpp</string>
      </property>
     </widget>
    </item>
@@ -90,6 +96,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="text">
+      <string>netology_usr_cpp</string>
+     </property>
     </widget>
    </item>
    <item row="3" column="0">
@@ -116,6 +125,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="text">
+      <string>CppNeto3</string>
+     </property>
     </widget>
    </item>
    <item row="4" column="0">
@@ -141,6 +153,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="minimum">
+      <number>5432</number>
      </property>
      <property name="maximum">
       <number>65535</number>

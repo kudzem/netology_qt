@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Concurrent)
 
 
 set(PROJECT_SOURCES
@@ -30,7 +30,7 @@ add_executable(08_PreDataBase
 
 
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/PG_Libs)
-target_link_libraries(08_PreDataBase PRIVATE Qt6::Widgets
+target_link_libraries(08_PreDataBase PRIVATE Qt6::Widgets Qt6::Sql Qt6::Concurrent
                                              libcrypto-3-x64
                                              libiconv-2
                                              libintl-9
