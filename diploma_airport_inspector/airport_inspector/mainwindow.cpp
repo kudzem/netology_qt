@@ -199,3 +199,13 @@ void MainWindow::on_le_destination_textChanged(const QString &arg1)
     db_handler->getAirportListLike(db_reader, ui->le_destination->text());
 }
 
+
+void MainWindow::on_pushButton_clicked()
+{
+    QString tmp = ui->le_departure->text();
+    ui->le_departure->setText(ui->le_destination->text());
+    ui->le_destination->setText(tmp);
+
+    on_pb_search_clicked();
+}
+
