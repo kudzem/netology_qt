@@ -47,3 +47,34 @@ void database_reader::DisconnectFromDB()
     db->close();
     emit sig_SendStatusConnection(0);
 }
+
+//void database_reader::getListOfAirports()
+//{
+//    const QString request = "SELECT airport_name->>'ru' as \"airportName\", airport_code FROM bookings.airports_data";
+
+//    model->setQuery(request,*db);
+
+//    if (model->lastError().isValid())
+//        qDebug() << model->lastError();
+
+//    model->setHeaderData(0, Qt::Horizontal, tr("Название"));
+//    model->setHeaderData(1, Qt::Horizontal, tr("Описание"));
+
+//    releaseLastModel();
+//    lastModel = model;
+
+//    emit sig_SendDataFromDB2(model);
+//}
+
+QSqlQuery*
+database_reader::requestRawQuery(QString requestStr)
+{
+    QSqlQuery* query = new QSqlQuery(*db);
+    bool res = query->exec(requestStr);
+
+    if (!res) {
+        qDebug() << "Failed to execute query";
+    }
+
+    return query;
+}

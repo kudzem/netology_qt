@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QSqlDatabase>
+#include <QSqlQueryModel>
+#include <QSqlQuery>
 
 class database_reader : public QObject
 {
@@ -13,8 +15,11 @@ public:
     void ConnectToDB();
     void DisconnectFromDB();
 
+    QSqlQuery* requestRawQuery(QString request);
+
 private:
     QSqlDatabase* db = nullptr;
+    QSqlQueryModel* model = nullptr;
 
 signals:
     void sig_SendStatusConnection(bool);

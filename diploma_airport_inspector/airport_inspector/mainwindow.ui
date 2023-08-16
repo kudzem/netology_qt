@@ -19,7 +19,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
     <item row="0" column="0">
-     <widget class="QTabWidget" name="tabWidget">
+     <widget class="QTabWidget" name="tab_functions">
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -31,14 +31,15 @@
         <item row="1" column="1">
          <widget class="QLineEdit" name="le_destination"/>
         </item>
-        <item row="1" column="2">
-         <widget class="QLineEdit" name="le_date"/>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLineEdit" name="le_departure"/>
-        </item>
-        <item row="2" column="0" colspan="5">
-         <widget class="QTableView" name="tv_flights"/>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Дата</string>
+          </property>
+          <property name="buddy">
+           <cstring>le_date</cstring>
+          </property>
+         </widget>
         </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label">
@@ -50,6 +51,22 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="le_date"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLineEdit" name="le_departure"/>
+        </item>
+        <item row="1" column="3">
+         <widget class="QPushButton" name="pb_search">
+          <property name="text">
+           <string>Найти</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="5">
+         <widget class="QTableView" name="tv_flights"/>
+        </item>
         <item row="0" column="1">
          <widget class="QLabel" name="label_2">
           <property name="text">
@@ -57,23 +74,6 @@
           </property>
           <property name="buddy">
            <cstring>le_destination</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Дата</string>
-          </property>
-          <property name="buddy">
-           <cstring>le_date</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3">
-         <widget class="QPushButton" name="pb_search">
-          <property name="text">
-           <string>Найти</string>
           </property>
          </widget>
         </item>
@@ -87,7 +87,7 @@
         <item row="2" column="0" colspan="2">
          <widget class="QTabWidget" name="tabWidget_2">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab_5">
            <attribute name="title">
@@ -130,6 +130,11 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_7">
+       <attribute name="title">
+        <string>Страница</string>
+       </attribute>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -142,7 +147,7 @@
   <tabstop>le_date</tabstop>
   <tabstop>pb_search</tabstop>
   <tabstop>tv_flights</tabstop>
-  <tabstop>tabWidget</tabstop>
+  <tabstop>tab_functions</tabstop>
   <tabstop>le_airport_name</tabstop>
   <tabstop>pb_show_load</tabstop>
   <tabstop>tabWidget_2</tabstop>
