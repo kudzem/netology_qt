@@ -1,5 +1,6 @@
 #include "database_reader.h"
 #include <QVector>
+#include <QSqlError>
 
 const QVector<QString> credentials = { "981757-ca08998.tmweb.ru", "demo", "netology_usr_cpp", "CppNeto3", "5432" };
 
@@ -19,11 +20,14 @@ database_reader::database_reader()
     db = new QSqlDatabase();
 
     *db = QSqlDatabase::addDatabase(POSTGRE_DRIVER, DB_NAME);
+
+    model = new QSqlQueryModel;
 }
 
 database_reader::~database_reader()
 {
     DisconnectFromDB();
+    delete model;
     delete db;
 }
 
@@ -77,4 +81,16 @@ database_reader::requestRawQuery(QString requestStr)
     }
 
     return query;
+}
+
+
+QSqlQueryModel*
+database_reader::requestModelQuery(QString request)
+{
+    model->setQuery(request,*db);
+
+    if (model->lastError().isValid())
+        qDebug() << model->lastError();
+
+    return model;
 }

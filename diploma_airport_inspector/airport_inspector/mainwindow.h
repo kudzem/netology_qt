@@ -30,6 +30,7 @@ private slots:
     void on_le_departure_textChanged(const QString &arg1);
 
     void showAirportList(QVector<QString> airports);
+    void showRelevantFlights(QAbstractItemModel *model);
 
     void departure_chosen(const QModelIndex& index);
     void destination_chosen(const QModelIndex& index);

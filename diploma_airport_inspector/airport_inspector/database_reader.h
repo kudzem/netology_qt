@@ -16,6 +16,7 @@ public:
     void DisconnectFromDB();
 
     QSqlQuery* requestRawQuery(QString request);
+    QSqlQueryModel* requestModelQuery(QString request);
 
 private:
     QSqlDatabase* db = nullptr;

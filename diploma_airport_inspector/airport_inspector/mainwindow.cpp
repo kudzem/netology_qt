@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->le_departure->installEventFilter(this);
     ui->le_destination->installEventFilter(this);
     ui->le_date->installEventFilter(this);
+    ui->pb_search->installEventFilter(this);
 
     db_reader = new database_reader;
     connect(db_reader, &database_reader::sig_SendStatusConnection, this, &MainWindow::ReceiveStatusConnectionToDB);
@@ -28,14 +29,15 @@ MainWindow::MainWindow(QWidget *parent)
     calendar = new QCalendarWidget(ui->tab_functions);
     calendar->hide();
     calendar->installEventFilter(ui->tab_functions);
+    calendar->setMinimumDate(QDate(2016, 8, 15));
+    calendar->setMaximumDate(QDate(2017, 9, 14));
+
+    ui->le_date->setText(calendar->selectedDate().toString());
 
     connect(departList, &QListView::clicked, this, &MainWindow::departure_chosen);
     connect(destList, &QListView::clicked, this, &MainWindow::destination_chosen);
 
     connect(calendar, &QCalendarWidget::selectionChanged, this, &MainWindow::date_chosen);
-
-    //departList->pos().setX(ui->le_departure->geometry().x() + ui->le_departure->pos().x() + ui->tabWidget->pos().x());
-    //departList->pos().setY(ui->le_departure->geometry().y() + ui->tabWidget->pos().x());
 
     departListModel = new QStringListModel(this);
     departList->setModel(departListModel);
@@ -57,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
                           200);
 
     connect(db_handler, &db_info_handler::sig_sendAirportList, this, &MainWindow::showAirportList);
+    connect(db_handler, &db_info_handler::sig_sendFlightList, this, &MainWindow::showRelevantFlights);
 }
 
 MainWindow::~MainWindow()
@@ -81,7 +84,19 @@ void MainWindow::ReceiveStatusConnectionToDB(bool status)
 
 void MainWindow::on_pb_search_clicked()
 {
-
+    if (ui->le_date->text() != "")
+    {
+        db_handler->getFlights(db_reader,
+                               ui->le_departure->text(),
+                               ui->le_destination->text(),
+                               calendar->selectedDate());
+    }
+    else
+    {
+        db_handler->getFlights(db_reader,
+                               ui->le_departure->text(),
+                               ui->le_destination->text());
+    }
 }
 
 
@@ -99,15 +114,21 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         {
             db_handler->getAirportListLike(db_reader, ui->le_departure->text());
             departList->show();
+            calendar->hide();
         }
         else if(watched == ui->le_destination || watched == destList)
         {
-                db_handler->getAirportListLike(db_reader, ui->le_destination->text());
-                destList->show();
+            db_handler->getAirportListLike(db_reader, ui->le_destination->text());
+            destList->show();
+            calendar->hide();
         }
-        else if(watched == ui->le_date)
+        else if(watched == ui->le_date || watched == calendar)
         {
-                calendar->show();
+            calendar->show();
+        }
+        else if(watched == ui->pb_search)
+        {
+            calendar->hide();
         }
     }
     else if( event->type() == QEvent::FocusOut )
@@ -122,7 +143,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         }
         else if(watched == ui->le_date)
         {
-            calendar->hide();
+            //calendar->hide();
         }
     }
 
@@ -139,6 +160,19 @@ void MainWindow::showAirportList(QStringList airports)
         destList->reset();
         destListModel->setStringList(airports);
     }
+}
+
+void MainWindow::showRelevantFlights(QAbstractItemModel *model)
+{
+    ui->tv_flights->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tv_flights->setModel(model);
+    ui->tv_flights->show();
+
+    // faster alternative to hide columns
+    //    ui->tv_result->setColumnHidden(0,true);
+    //    for(int i=3; i <=14 ; ++i) {
+    //    ui->tv_result->setColumnHidden(3,true);
+    //    }
 }
 
 void MainWindow::departure_chosen(const QModelIndex& index) {
