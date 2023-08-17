@@ -40,6 +40,10 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_pb_search_pressed();
+
+    void on_pushButton_2_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -56,5 +60,7 @@ private:
     QStringListModel* destListModel;
 
     QCalendarWidget* calendar;
+
+    QStatusBar *status_bar;
 };
 #endif // MAINWINDOW_H

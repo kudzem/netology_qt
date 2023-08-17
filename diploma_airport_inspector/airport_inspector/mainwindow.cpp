@@ -7,6 +7,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    status_bar = new QStatusBar(this);
+    ui->gridLayout_3->addWidget(status_bar);
+    status_bar->showMessage("Не подключено к базе");
+
     ui->le_departure->installEventFilter(this);
     ui->le_destination->installEventFilter(this);
     ui->le_date->installEventFilter(this);
@@ -73,36 +77,40 @@ void MainWindow::ReceiveStatusConnectionToDB(bool status)
 {
     if(status)
     {
-        setWindowTitle("Инспектор Аэропортов - Подключено к БД");
+        status_bar->showMessage("Подключено к базе");
     }
     else
     {
-        setWindowTitle("Инспектор Аэропортов - Не подключено к БД");
+        status_bar->showMessage("Не подключено к базе");
     }
 }
 
 
 void MainWindow::on_pb_search_clicked()
 {
+    QString departureAirport = ui->le_departure->text();
+    QString destinationAirport = ui->le_destination->text();
+
     if (ui->le_date->text() != "")
     {
         db_handler->getFlights(db_reader,
-                               ui->le_departure->text(),
-                               ui->le_destination->text(),
+                               departureAirport,
+                               destinationAirport,
                                calendar->selectedDate());
     }
     else
     {
         db_handler->getFlights(db_reader,
-                               ui->le_departure->text(),
-                               ui->le_destination->text());
+                               departureAirport,
+                               destinationAirport);
     }
 }
 
 
 void MainWindow::on_le_departure_textChanged(const QString &arg1)
 {
-    db_handler->getAirportListLike(db_reader, ui->le_departure->text());
+    QString departureFrom = ui->le_departure->text();
+    db_handler->getAirportListLike(db_reader, departureFrom);
 }
 
 // Implementation
@@ -112,13 +120,31 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
     {
         if(watched == ui->le_departure || watched == departList)
         {
-            db_handler->getAirportListLike(db_reader, ui->le_departure->text());
+            QString airport = ui->le_departure->text();
+            if(airport == "Любой") {
+                airport = "";
+            }
+
+            if (ui->le_departure->text() == "Любой") {
+                ui->le_departure->setText("");
+            }
+
+            db_handler->getAirportListLike(db_reader, airport);
             departList->show();
             calendar->hide();
         }
         else if(watched == ui->le_destination || watched == destList)
         {
-            db_handler->getAirportListLike(db_reader, ui->le_destination->text());
+            QString airport = ui->le_destination->text();
+            if(airport == "Любой") {
+                airport = "";
+            }
+
+            if (ui->le_destination->text() == "Любой") {
+                ui->le_destination->setText("");
+            }
+
+            db_handler->getAirportListLike(db_reader, airport);
             destList->show();
             calendar->hide();
         }
@@ -136,10 +162,18 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         if(watched == ui->le_departure)
         {
             departList->hide();
+
+            if (ui->le_departure->text() == "") {
+                ui->le_departure->setText("Любой");
+            }
         }
         else if(watched == ui->le_destination)
         {
             destList->hide();
+
+            if (ui->le_destination->text() == "") {
+                ui->le_destination->setText("Любой");
+            }
         }
         else if(watched == ui->le_date)
         {
@@ -196,16 +230,30 @@ void MainWindow::date_chosen() {
 
 void MainWindow::on_le_destination_textChanged(const QString &arg1)
 {
-    db_handler->getAirportListLike(db_reader, ui->le_destination->text());
+    QString destinationTo = ui->le_destination->text();
+    db_handler->getAirportListLike(db_reader, destinationTo);
 }
 
 
 void MainWindow::on_pushButton_clicked()
 {
     QString tmp = ui->le_departure->text();
+
     ui->le_departure->setText(ui->le_destination->text());
     ui->le_destination->setText(tmp);
 
     on_pb_search_clicked();
+}
+
+
+void MainWindow::on_pb_search_pressed()
+{
+}
+
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    ui->le_date->setText("");
+    calendar->hide();
 }
 

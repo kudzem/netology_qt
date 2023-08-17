@@ -32,12 +32,16 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
         <item row="1" column="2">
-         <widget class="QLineEdit" name="le_destination"/>
+         <widget class="QLineEdit" name="le_destination">
+          <property name="text">
+           <string>Любой</string>
+          </property>
+         </widget>
         </item>
         <item row="0" column="3">
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>Дата</string>
+           <string>Когда</string>
           </property>
           <property name="buddy">
            <cstring>le_date</cstring>
@@ -47,7 +51,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>От</string>
+           <string>Откуда</string>
           </property>
           <property name="buddy">
            <cstring>le_departure</cstring>
@@ -56,29 +60,6 @@
         </item>
         <item row="1" column="3">
          <widget class="QLineEdit" name="le_date"/>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLineEdit" name="le_departure"/>
-        </item>
-        <item row="1" column="4">
-         <widget class="QPushButton" name="pb_search">
-          <property name="text">
-           <string>Найти</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" colspan="6">
-         <widget class="QTableView" name="tv_flights"/>
-        </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>До</string>
-          </property>
-          <property name="buddy">
-           <cstring>le_destination</cstring>
-          </property>
-         </widget>
         </item>
         <item row="1" column="1">
          <widget class="QPushButton" name="pushButton">
@@ -99,6 +80,46 @@
           </property>
           <property name="text">
            <string>&lt;&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLineEdit" name="le_departure">
+          <property name="text">
+           <string>Любой</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QPushButton" name="pb_search">
+          <property name="text">
+           <string>Найти</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="7">
+         <widget class="QTableView" name="tv_flights"/>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Куда</string>
+          </property>
+          <property name="buddy">
+           <cstring>le_destination</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>X</string>
           </property>
          </widget>
         </item>

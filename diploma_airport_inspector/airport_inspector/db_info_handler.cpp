@@ -9,6 +9,8 @@ db_info_handler::db_info_handler(QObject *parent)
 void
 db_info_handler::getAirportListLike(database_reader* db_reader, QString pattern)
 {
+    if (pattern == "Любой") pattern = "";
+
     const QString request = "SELECT airport_name->>'ru' as \"airportName\", airport_code FROM bookings.airports_data WHERE airport_name->>'ru' LIKE '" + pattern + "%' ORDER BY airport_name->>'ru'";
 
     qDebug() << request;
@@ -35,10 +37,8 @@ db_info_handler::getFlights(database_reader* db_reader,
                             QString destination,
                             QDate date)
 {
-//    const QString request = "SELECT flight_no, scheduled_arrival, ву.airport_name->>'ru' \
-//                            FROM bookings.flights f \
-//                            JOIN bookings.airports_data ad on ad.airport_code = f.departure_airport \
-//                            WHERE f.arrival_airport  = ‘airportCode’";
+    if (departure == "Любой") departure = "";
+    if (destination == "Любой") destination = "";
 
     const QString request = "SELECT flight_no, dep.airport_name->>'ru', scheduled_departure, arrival.airport_name->>'ru', scheduled_arrival  \
                              FROM bookings.flights f\
@@ -68,6 +68,9 @@ db_info_handler::getFlights(database_reader* db_reader,
                             QString departure,
                             QString destination)
 {
+    if (departure == "Любой") departure = "";
+    if (destination == "Любой") destination = "";
+
     const QString request = "SELECT flight_no, dep.airport_name->>'ru', scheduled_departure, arrival.airport_name->>'ru', scheduled_arrival  \
                              FROM bookings.flights f\
                              JOIN bookings.airports_data dep on dep.airport_code = f.departure_airport \
