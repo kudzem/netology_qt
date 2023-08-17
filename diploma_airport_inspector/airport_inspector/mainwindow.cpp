@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
+#include <QKeyEvent>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -24,19 +26,20 @@ MainWindow::MainWindow(QWidget *parent)
 
     departList = new QListView(ui->tab_functions);
     departList->hide();
-    departList->installEventFilter(ui->tab_functions);
+    departList->installEventFilter(this);
 
     destList = new QListView(ui->tab_functions);
     destList->hide();
-    destList->installEventFilter(ui->tab_functions);
+    destList->installEventFilter(this);
 
     calendar = new QCalendarWidget(ui->tab_functions);
     calendar->hide();
-    calendar->installEventFilter(ui->tab_functions);
+    calendar->installEventFilter(this);
     calendar->setMinimumDate(QDate(2016, 8, 15));
     calendar->setMaximumDate(QDate(2017, 9, 14));
 
-    ui->le_date->setText(calendar->selectedDate().toString());
+    //ui->le_date->setText(calendar->selectedDate().toString());
+    ui->le_departure->setFocus();
 
     connect(departList, &QListView::clicked, this, &MainWindow::departure_chosen);
     connect(destList, &QListView::clicked, this, &MainWindow::destination_chosen);
@@ -45,13 +48,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     departListModel = new QStringListModel(this);
     departList->setModel(departListModel);
-    departList->setGeometry(ui->le_departure->geometry().left() + ui->tab_functions->geometry().left(),
+    departList->setGeometry(ui->le_departure->geometry().left(),
                             ui->le_departure->geometry().bottom() + ui->tab_functions->geometry().bottom(),
                             ui->le_departure->geometry().width(),
                             10*ui->le_departure->geometry().height());
 
     destListModel = new QStringListModel(this);
     destList->setModel(destListModel);
+
     destList->setGeometry(ui->le_destination->geometry().left() + ui->tab_functions->geometry().left(),
                             ui->le_destination->geometry().bottom() + ui->tab_functions->geometry().bottom(),
                             ui->le_destination->geometry().width(),
@@ -116,7 +120,27 @@ void MainWindow::on_le_departure_textChanged(const QString &arg1)
 // Implementation
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
-    if( event->type() == QEvent::FocusIn )
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent* keyEvent = (QKeyEvent*)event;
+        if (keyEvent->key() == Qt::Key_Down) {
+            if(ui->le_departure->hasFocus()) {
+                departList->setFocus();
+            }
+            else if (ui->le_destination->hasFocus()) {
+                destList->setFocus();
+            }
+        }
+        else //if (keyEvent->key() == Qt::Key_Enter) {
+        {
+            if(departList->hasFocus()) {
+                departure_chosen(departList->currentIndex());
+            }
+            else if (destList->hasFocus()) {
+                destination_chosen(destList->currentIndex());
+            }
+        }
+    }
+    else if( event->type() == QEvent::FocusIn )
     {
         if(watched == ui->le_departure || watched == departList)
         {
@@ -161,15 +185,19 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
     {
         if(watched == ui->le_departure)
         {
-            departList->hide();
+            if (!departList->hasFocus()) {
+                departList->hide();
 
-            if (ui->le_departure->text() == "") {
-                ui->le_departure->setText("Любой");
+                if (ui->le_departure->text() == "") {
+                    ui->le_departure->setText("Любой");
+                }
             }
         }
         else if(watched == ui->le_destination)
         {
-            destList->hide();
+            if (!destList->hasFocus()) {
+                destList->hide();
+            }
 
             if (ui->le_destination->text() == "") {
                 ui->le_destination->setText("Любой");
