@@ -34,6 +34,8 @@ private slots:
     void showRelevantFlights(QAbstractItemModel *model);
     void showMonthlyArrivalStats(QList<double>& arrivals_per_month);
     void showMonthlyDepartureStats(QList<double>& departures_per_month);
+    void showDailyArrivalStats(QList<double>& arrivals_per_day);
+    void showDailyDepartureStats(QList<double>& departures_per_day);
 
     void departure_chosen(const QModelIndex& index);
     void destination_chosen(const QModelIndex& index);
@@ -52,6 +54,8 @@ private slots:
     void on_le_airport_name_textChanged(const QString &arg1);
 
     void on_pb_show_load_clicked();
+
+    void monthSelected(int index);
 
 private:
     Ui::MainWindow *ui;
@@ -85,10 +89,14 @@ private:
     QBarSet* arv;
     QBarSet* dep;
 
+    void initDailyChart();
     QChart* daily_chart;
     QLineSeries* daily_arrivals;
     QLineSeries* daily_departures;
     QChartView* daily_view;
+    QValueAxis* daily_chart_axisY;
+
+    QComboBox* monthSelector;
 
     double FindMax(QList<double>& data);
 };

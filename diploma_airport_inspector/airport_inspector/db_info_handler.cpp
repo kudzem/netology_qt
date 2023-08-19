@@ -111,6 +111,24 @@ const QString db_info_handler::requestToCountMonthlyArrivals =
       GROUP BY EXTRACT(MONTH FROM scheduled_arrival) \
       ORDER BY EXTRACT(MONTH FROM scheduled_arrival)";
 
+const QString db_info_handler::requestToCountDailyDepartures =
+    "SELECT count(*)  \
+    FROM bookings.flights f \
+    JOIN bookings.airports_data dep on dep.airport_code = f.departure_airport \
+      WHERE dep.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
+      AND EXTRACT(MONTH FROM scheduled_departure) = MONTH_PATTERN_TO_REPLACE \
+      GROUP BY EXTRACT(DAY FROM scheduled_departure) \
+      ORDER BY EXTRACT(DAY FROM scheduled_departure)";
+
+const QString db_info_handler::requestToCountDailyArrivals =
+    "SELECT count(*)  \
+    FROM bookings.flights f \
+    JOIN bookings.airports_data arrival on arrival.airport_code = f.arrival_airport \
+      WHERE arrival.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
+      AND EXTRACT(MONTH FROM scheduled_arrival) = MONTH_PATTERN_TO_REPLACE \
+    GROUP BY EXTRACT(DAY FROM scheduled_arrival) \
+    ORDER BY EXTRACT(DAY FROM scheduled_arrival)";
+
 void
 db_info_handler::getFlightStatMonthly(database_reader* db_reader,
                                       QString& airportName,
@@ -136,8 +154,6 @@ db_info_handler::getFlightStatMonthly(database_reader* db_reader,
 
     qDebug() << airportList->lastError();
 
-    uint32_t conterRows = 0;
-
     QList<double> airports;
 
     while(airportList->next()){
@@ -153,6 +169,52 @@ db_info_handler::getFlightStatMonthly(database_reader* db_reader,
     else
     {
         emit sig_sendMonthDepartureStat(airports);
+    }
+}
+
+
+void
+db_info_handler::getFlightStatDaily(database_reader* db_reader,
+                                    QString& airportName,
+                                    int month,
+                                    bool arrivingFlights)
+{
+    if (airportName == "Любой") airportName = "";
+
+    QString request;
+
+    if(arrivingFlights)
+    {
+        request = requestToCountDailyArrivals;
+    }
+    else
+    {
+        request = requestToCountDailyDepartures;
+    }
+
+    request = request.replace(QString("AIRPORT_PATTERN_TO_REPLACE"), airportName);
+    request = request.replace(QString("MONTH_PATTERN_TO_REPLACE"), QString::number(month));
+
+    qDebug() << request;
+    QSqlQuery* airportList = db_reader->requestRawQuery(request);
+
+    qDebug() << airportList->lastError();
+
+    QList<double> stats;
+
+    while(airportList->next()){
+        int flightsPerDay = airportList->value(0).toInt();
+        qDebug() << flightsPerDay;
+        stats << flightsPerDay;
+    }
+
+    if(arrivingFlights)
+    {
+        emit sig_sendDayArrivalStat(stats);
+    }
+    else
+    {
+        emit sig_sendDayDepartureStat(stats);
     }
 }
 

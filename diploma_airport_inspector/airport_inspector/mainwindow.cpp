@@ -85,9 +85,25 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     initMonthlyChart();
+    initDailyChart();
+
+    monthSelector = new QComboBox(this);
+    ui->lo_for_daily->addWidget(monthSelector);
+
+    ui->lo_for_chart->addWidget(monthly_view);
+    ui->lo_for_daily->addWidget(daily_view);
+
+
+    QStringList months = {"Январь", "Ферваль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" };
+    monthSelector->addItems(months);
 
     connect(db_handler, &db_info_handler::sig_sendMonthDepartureStat, this, MainWindow::showMonthlyDepartureStats);
     connect(db_handler, &db_info_handler::sig_sendMonthArrivalStat, this, MainWindow::showMonthlyArrivalStats);
+    connect(db_handler, &db_info_handler::sig_sendDayDepartureStat, this, MainWindow::showDailyDepartureStats);
+    connect(db_handler, &db_info_handler::sig_sendDayArrivalStat, this, MainWindow::showDailyArrivalStats);
+
+    connect(monthSelector, &QComboBox::currentIndexChanged, this, MainWindow::monthSelected);
+
 }
 
 MainWindow::~MainWindow()
@@ -353,12 +369,28 @@ void MainWindow::on_le_airport_name_textChanged(const QString &arg1)
     db_handler->getAirportListLike(db_reader, destinationTo);
 }
 
+void MainWindow::monthSelected(int index) {
+    QString airport = ui->le_airport_name->text();
+
+    db_handler->getFlightStatDaily(db_reader, airport, index + 1, true);
+    db_handler->getFlightStatDaily(db_reader, airport, index + 1, false);
+}
+
 
 void MainWindow::on_pb_show_load_clicked()
 {
     QString airport = ui->le_airport_name->text();
-    db_handler->getFlightStatMonthly(db_reader,airport,true);
-    db_handler->getFlightStatMonthly(db_reader,airport,false);
+
+    if (ui->tabWidget_2->tabText(ui->tabWidget_2->currentIndex()) == "Ежемесячно")
+    {
+        db_handler->getFlightStatMonthly(db_reader,airport,true);
+        db_handler->getFlightStatMonthly(db_reader,airport,false);
+    }
+    else if (ui->tabWidget_2->tabText(ui->tabWidget_2->currentIndex()) == "Ежедневно")
+    {
+        db_handler->getFlightStatDaily(db_reader, airport, monthSelector->currentIndex() + 1, true);
+        db_handler->getFlightStatDaily(db_reader, airport, monthSelector->currentIndex() + 1, false);
+    }
 }
 
 
@@ -390,6 +422,31 @@ void MainWindow::initMonthlyChart()
     monthly_arrivals->attachAxis(monthly_chart_axisY);
 }
 
+
+void MainWindow::initDailyChart()
+{
+    daily_chart = new QChart();
+    daily_chart->legend()->setVisible(true);
+    daily_chart->setTitle("Загрузка аэропорта в");
+
+    daily_departures = new QLineSeries();
+    daily_chart->addSeries(daily_departures);
+
+    daily_arrivals = new QLineSeries();
+    daily_chart->addSeries(daily_arrivals);
+
+    daily_view = new QChartView(daily_chart);
+
+    auto axisX = new QValueAxis;
+    daily_chart->addAxis(axisX, Qt::AlignBottom);
+    daily_arrivals->attachAxis(axisX);
+    axisX->setRange(0,31);
+
+    daily_chart_axisY = new QValueAxis;
+    daily_chart->addAxis(daily_chart_axisY, Qt::AlignLeft);
+    daily_arrivals->attachAxis(daily_chart_axisY);
+}
+
 void MainWindow::showMonthlyArrivalStats(QList<double>& arrivals_per_month)
 {
     arv->remove(0,12);
@@ -397,7 +454,6 @@ void MainWindow::showMonthlyArrivalStats(QList<double>& arrivals_per_month)
 
     monthly_chart_axisY->setRange(0, FindMax(arrivals_per_month));
 
-    monthly_view->show();
     monthly_view->update();
 }
 
@@ -408,8 +464,42 @@ void MainWindow::showMonthlyDepartureStats(QList<double>& departures_per_month)
 
     monthly_chart_axisY->setRange(0, FindMax(departures_per_month));
 
-    monthly_view->show();
     monthly_view->update();
+}
+
+
+void MainWindow::showDailyArrivalStats(QList<double>& arrivals_per_day)
+{
+    daily_arrivals->clear();
+
+    size_t s = arrivals_per_day.size();
+
+    int i = 0;
+    foreach(double num, arrivals_per_day)
+    {
+        daily_arrivals->append(i, arrivals_per_day[i]);
+        ++i;
+    }
+
+    daily_chart_axisY->setRange(0, FindMax(arrivals_per_day));
+    daily_view->update();
+}
+
+void MainWindow::showDailyDepartureStats(QList<double>& departures_per_day)
+{
+    daily_departures->clear();
+
+    size_t s = departures_per_day.size();
+
+    int i = 0;
+    foreach(double num, departures_per_day)
+    {
+        daily_departures->append(i, departures_per_day[i]);
+        ++i;
+    }
+
+    daily_chart_axisY->setRange(0, FindMax(departures_per_day));
+    daily_view->update();
 }
 
 double MainWindow::FindMax(QList<double>& data)
