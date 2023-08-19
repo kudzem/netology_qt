@@ -1,4 +1,5 @@
 #include "db_info_handler.h"
+#include <QSqlError>
 
 db_info_handler::db_info_handler(QObject *parent)
     : QObject{parent}
@@ -91,3 +92,67 @@ db_info_handler::getFlights(database_reader* db_reader,
 
     emit sig_sendFlightList(flightList);
 }
+
+
+const QString db_info_handler::requestToCountMonthlyDepartures =
+    "SELECT count(*)  \
+     FROM bookings.flights f \
+     JOIN bookings.airports_data dep on dep.airport_code = f.departure_airport \
+     WHERE dep.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
+     GROUP BY EXTRACT(MONTH FROM scheduled_departure) \
+     ORDER BY EXTRACT(MONTH FROM scheduled_departure)";
+
+
+const QString db_info_handler::requestToCountMonthlyArrivals =
+    "SELECT count(*)  \
+    FROM bookings.flights f \
+    JOIN bookings.airports_data arrival on arrival.airport_code = f.arrival_airport \
+      WHERE arrival.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
+      GROUP BY EXTRACT(MONTH FROM scheduled_arrival) \
+      ORDER BY EXTRACT(MONTH FROM scheduled_arrival)";
+
+void
+db_info_handler::getFlightStatMonthly(database_reader* db_reader,
+                                      QString& airportName,
+                                      bool arrivingFlights)
+{
+    if (airportName == "Любой") airportName = "";
+
+    QString request;
+
+    if(arrivingFlights)
+    {
+        request = requestToCountMonthlyArrivals;
+    }
+    else
+    {
+        request = requestToCountMonthlyDepartures;
+    }
+
+    request = request.replace(QString("AIRPORT_PATTERN_TO_REPLACE"), airportName);
+
+    qDebug() << request;
+    QSqlQuery* airportList = db_reader->requestRawQuery(request);
+
+    qDebug() << airportList->lastError();
+
+    uint32_t conterRows = 0;
+
+    QList<double> airports;
+
+    while(airportList->next()){
+        int flightsPerMonth = airportList->value(0).toInt();
+        qDebug() << flightsPerMonth;
+        airports << flightsPerMonth;
+    }
+
+    if(arrivingFlights)
+    {
+        emit sig_sendMonthArrivalStat(airports);
+    }
+    else
+    {
+        emit sig_sendMonthDepartureStat(airports);
+    }
+}
+

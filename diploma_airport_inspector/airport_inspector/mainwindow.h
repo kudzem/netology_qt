@@ -5,6 +5,7 @@
 #include <QListView>
 #include <QCalendarWidget>
 #include <QStringListModel>
+#include <QtCharts>
 
 #include "database_reader.h"
 #include "db_info_handler.h"
@@ -31,10 +32,14 @@ private slots:
 
     void showAirportList(QVector<QString> airports);
     void showRelevantFlights(QAbstractItemModel *model);
+    void showMonthlyArrivalStats(QList<double>& arrivals_per_month);
+    void showMonthlyDepartureStats(QList<double>& departures_per_month);
 
     void departure_chosen(const QModelIndex& index);
     void destination_chosen(const QModelIndex& index);
     void date_chosen();
+
+    void stat_airport_chosen(const QModelIndex& index);
 
     void on_le_destination_textChanged(const QString &arg1);
 
@@ -43,6 +48,10 @@ private slots:
     void on_pb_search_pressed();
 
     void on_pushButton_2_clicked();
+
+    void on_le_airport_name_textChanged(const QString &arg1);
+
+    void on_pb_show_load_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -62,5 +71,26 @@ private:
     QCalendarWidget* calendar;
 
     QStatusBar *status_bar;
+
+
+    QListView* airportStatList;
+    QStringListModel* airportStatListModel;
+
+    void initMonthlyChart();
+    QChart* monthly_chart;
+    QValueAxis* monthly_chart_axisY;
+    QBarSeries* monthly_departures;
+    QBarSeries* monthly_arrivals;
+    QChartView* monthly_view;
+    QBarSet* arv;
+    QBarSet* dep;
+
+    QChart* daily_chart;
+    QLineSeries* daily_arrivals;
+    QLineSeries* daily_departures;
+    QChartView* daily_view;
+
+    double FindMax(QList<double>& data);
 };
+
 #endif // MAINWINDOW_H
