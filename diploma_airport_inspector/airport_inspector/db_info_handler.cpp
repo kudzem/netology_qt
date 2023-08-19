@@ -17,18 +17,14 @@ db_info_handler::getAirportListLike(database_reader* db_reader, QString pattern)
     qDebug() << request;
     QSqlQuery* airportList = db_reader->requestRawQuery(request);
 
-    uint32_t conterRows = 0;
-
     QStringList airports;
 
     while(airportList->next()){
         QString v0 = airportList->value(0).toString();
         qDebug() << v0;
-        ++conterRows;
         airports << v0;
     }
 
-    //emit sig_SendDataFromDB(tableWg, requestAllFilms);
     emit sig_sendAirportList(airports);
 }
 
@@ -99,6 +95,7 @@ const QString db_info_handler::requestToCountMonthlyDepartures =
      FROM bookings.flights f \
      JOIN bookings.airports_data dep on dep.airport_code = f.departure_airport \
      WHERE dep.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
+     AND (scheduled_departure::date > date('2016-08-31') and scheduled_departure::date <= date('2017-08-31')) \
      GROUP BY EXTRACT(MONTH FROM scheduled_departure) \
      ORDER BY EXTRACT(MONTH FROM scheduled_departure)";
 
@@ -108,6 +105,7 @@ const QString db_info_handler::requestToCountMonthlyArrivals =
     FROM bookings.flights f \
     JOIN bookings.airports_data arrival on arrival.airport_code = f.arrival_airport \
       WHERE arrival.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
+      AND (scheduled_arrival::date > date('2016-08-31') and scheduled_arrival::date <= date('2017-08-31')) \
       GROUP BY EXTRACT(MONTH FROM scheduled_arrival) \
       ORDER BY EXTRACT(MONTH FROM scheduled_arrival)";
 
@@ -117,6 +115,7 @@ const QString db_info_handler::requestToCountDailyDepartures =
     JOIN bookings.airports_data dep on dep.airport_code = f.departure_airport \
       WHERE dep.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
       AND EXTRACT(MONTH FROM scheduled_departure) = MONTH_PATTERN_TO_REPLACE \
+      AND (scheduled_departure::date > date('2016-08-31') and scheduled_departure::date <= date('2017-08-31')) \
       GROUP BY EXTRACT(DAY FROM scheduled_departure) \
       ORDER BY EXTRACT(DAY FROM scheduled_departure)";
 
@@ -126,6 +125,7 @@ const QString db_info_handler::requestToCountDailyArrivals =
     JOIN bookings.airports_data arrival on arrival.airport_code = f.arrival_airport \
       WHERE arrival.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
       AND EXTRACT(MONTH FROM scheduled_arrival) = MONTH_PATTERN_TO_REPLACE \
+      AND (scheduled_arrival::date > date('2016-08-31') and scheduled_arrival::date <= date('2017-08-31')) \
     GROUP BY EXTRACT(DAY FROM scheduled_arrival) \
     ORDER BY EXTRACT(DAY FROM scheduled_arrival)";
 
