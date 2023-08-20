@@ -36,10 +36,10 @@ signals:
 
     void sig_sendAirportList(QStringList airports);
     void sig_sendFlightList(QAbstractItemModel *model);
-    void sig_sendMonthDepartureStat(QList<double>& stats);
-    void sig_sendDayDepartureStat(QList<double>& stats);
-    void sig_sendMonthArrivalStat(QList<double>& stats);
-    void sig_sendDayArrivalStat(QList<double>& stats);
+    void sig_sendMonthDepartureStat(QVector<double>& stats);
+    void sig_sendDayDepartureStat(QVector<double>& stats);
+    void sig_sendMonthArrivalStat(QVector<double>& stats);
+    void sig_sendDayArrivalStat(QVector<double>& stats);
 
 private:
     QVector<QString> airports;

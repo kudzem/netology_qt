@@ -91,43 +91,43 @@ db_info_handler::getFlights(database_reader* db_reader,
 
 
 const QString db_info_handler::requestToCountMonthlyDepartures =
-    "SELECT count(*)  \
+    "SELECT count(*), EXTRACT(MONTH FROM scheduled_departure) as month  \
      FROM bookings.flights f \
      JOIN bookings.airports_data dep on dep.airport_code = f.departure_airport \
      WHERE dep.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
      AND (scheduled_departure::date > date('2016-08-31') and scheduled_departure::date <= date('2017-08-31')) \
-     GROUP BY EXTRACT(MONTH FROM scheduled_departure) \
-     ORDER BY EXTRACT(MONTH FROM scheduled_departure)";
+     GROUP BY month \
+     ORDER BY month";
 
 
 const QString db_info_handler::requestToCountMonthlyArrivals =
-    "SELECT count(*)  \
+    "SELECT count(*), EXTRACT(MONTH FROM scheduled_arrival) as month  \
     FROM bookings.flights f \
     JOIN bookings.airports_data arrival on arrival.airport_code = f.arrival_airport \
       WHERE arrival.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
       AND (scheduled_arrival::date > date('2016-08-31') and scheduled_arrival::date <= date('2017-08-31')) \
-      GROUP BY EXTRACT(MONTH FROM scheduled_arrival) \
-      ORDER BY EXTRACT(MONTH FROM scheduled_arrival)";
+      GROUP BY month \
+      ORDER BY month";
 
 const QString db_info_handler::requestToCountDailyDepartures =
-    "SELECT count(*)  \
+    "SELECT count(*), EXTRACT(DAY FROM scheduled_departure) as day  \
     FROM bookings.flights f \
     JOIN bookings.airports_data dep on dep.airport_code = f.departure_airport \
       WHERE dep.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
-      AND EXTRACT(MONTH FROM scheduled_departure) = MONTH_PATTERN_TO_REPLACE \
+      AND EXTRACT(MONTH FROM scheduled_arrival) = MONTH_PATTERN_TO_REPLACE \
       AND (scheduled_departure::date > date('2016-08-31') and scheduled_departure::date <= date('2017-08-31')) \
-      GROUP BY EXTRACT(DAY FROM scheduled_departure) \
-      ORDER BY EXTRACT(DAY FROM scheduled_departure)";
+      GROUP BY day \
+      ORDER BY day";
 
 const QString db_info_handler::requestToCountDailyArrivals =
-    "SELECT count(*)  \
+    "SELECT count(*), EXTRACT(DAY FROM scheduled_arrival) as day  \
     FROM bookings.flights f \
     JOIN bookings.airports_data arrival on arrival.airport_code = f.arrival_airport \
       WHERE arrival.airport_name->>'ru' LIKE '%AIRPORT_PATTERN_TO_REPLACE' \
       AND EXTRACT(MONTH FROM scheduled_arrival) = MONTH_PATTERN_TO_REPLACE \
       AND (scheduled_arrival::date > date('2016-08-31') and scheduled_arrival::date <= date('2017-08-31')) \
-    GROUP BY EXTRACT(DAY FROM scheduled_arrival) \
-    ORDER BY EXTRACT(DAY FROM scheduled_arrival)";
+    GROUP BY day \
+    ORDER BY day";
 
 void
 db_info_handler::getFlightStatMonthly(database_reader* db_reader,
@@ -154,21 +154,23 @@ db_info_handler::getFlightStatMonthly(database_reader* db_reader,
 
     qDebug() << airportList->lastError();
 
-    QList<double> airports;
+    QVector<double> stats;
+    stats.resize(12);
 
     while(airportList->next()){
         int flightsPerMonth = airportList->value(0).toInt();
+        int month = airportList->value(1).toInt();
         qDebug() << flightsPerMonth;
-        airports << flightsPerMonth;
+        stats[month-1] = flightsPerMonth;
     }
 
     if(arrivingFlights)
     {
-        emit sig_sendMonthArrivalStat(airports);
+        emit sig_sendMonthArrivalStat(stats);
     }
     else
     {
-        emit sig_sendMonthDepartureStat(airports);
+        emit sig_sendMonthDepartureStat(stats);
     }
 }
 
@@ -200,12 +202,14 @@ db_info_handler::getFlightStatDaily(database_reader* db_reader,
 
     qDebug() << airportList->lastError();
 
-    QList<double> stats;
+    QVector<double> stats;
+    stats.resize(31);
 
     while(airportList->next()){
         int flightsPerDay = airportList->value(0).toInt();
+        int day = airportList->value(1).toInt();
         qDebug() << flightsPerDay;
-        stats << flightsPerDay;
+        stats[day-1] = flightsPerDay;
     }
 
     if(arrivingFlights)

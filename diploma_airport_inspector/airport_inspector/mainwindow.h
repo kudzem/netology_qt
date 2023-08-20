@@ -32,10 +32,10 @@ private slots:
 
     void showAirportList(QVector<QString> airports);
     void showRelevantFlights(QAbstractItemModel *model);
-    void showMonthlyArrivalStats(QList<double>& arrivals_per_month);
-    void showMonthlyDepartureStats(QList<double>& departures_per_month);
-    void showDailyArrivalStats(QList<double>& arrivals_per_day);
-    void showDailyDepartureStats(QList<double>& departures_per_day);
+    void showMonthlyArrivalStats(QVector<double>& arrivals_per_month);
+    void showMonthlyDepartureStats(QVector<double>& departures_per_month);
+    void showDailyArrivalStats(QVector<double>& arrivals_per_day);
+    void showDailyDepartureStats(QVector<double>& departures_per_day);
 
     void departure_chosen(const QModelIndex& index);
     void destination_chosen(const QModelIndex& index);
@@ -71,7 +71,6 @@ private:
     Ui::MainWindow *ui;
 
     database_reader* db_reader;
-
     db_info_handler* db_handler;
 
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
@@ -85,7 +84,6 @@ private:
     QCalendarWidget* calendar;
 
     QStatusBar *status_bar;
-
 
     QListView* airportStatList;
     QStringListModel* airportStatListModel;
@@ -104,11 +102,15 @@ private:
     QLineSeries* daily_arrivals;
     QLineSeries* daily_departures;
     QChartView* daily_view;
+    QValueAxis* daily_chart_axisX;
     QValueAxis* daily_chart_axisY;
+
+    double maxArrivalsPerMonth = 0;
+    double maxArrivalsPerDay = 0;
 
     QComboBox* monthSelector;
 
-    double FindMax(QList<double>& data);
+    double FindMax(QVector<double>& data);
 
     void notifyNotConnected();
 
