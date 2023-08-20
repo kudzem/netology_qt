@@ -99,6 +99,14 @@ private:
     QComboBox* monthSelector;
 
     double FindMax(QList<double>& data);
+
+    void notifyNotConnected();
+
+    QTimer* retryConnection;
+
+    bool isClosed = false;
+
+    void closeEvent(QCloseEvent* event);
 };
 
 #endif // MAINWINDOW_H

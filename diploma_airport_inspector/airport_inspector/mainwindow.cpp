@@ -2,6 +2,7 @@
 #include "./ui_mainwindow.h"
 
 #include <QKeyEvent>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -9,9 +10,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    retryConnection = new QTimer(this);
+    retryConnection->setInterval(5000);
+
     status_bar = new QStatusBar(this);
     ui->gridLayout_3->addWidget(status_bar);
     status_bar->showMessage("Не подключено к базе");
+    status_bar->setStyleSheet("color:red");
 
     ui->le_departure->installEventFilter(this);
     ui->le_destination->installEventFilter(this);
@@ -104,6 +109,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(monthSelector, &QComboBox::currentIndexChanged, this, MainWindow::monthSelected);
 
+    connect(retryConnection, &QTimer::timeout, db_reader, &database_reader::ConnectToDB);
 }
 
 MainWindow::~MainWindow()
@@ -118,13 +124,42 @@ void MainWindow::ReceiveStatusConnectionToDB(bool status)
     if(status)
     {
         status_bar->showMessage("Подключено к базе");
+        status_bar->setStyleSheet("color:green");
     }
     else
     {
         status_bar->showMessage("Не подключено к базе");
+        status_bar->setStyleSheet("color:red");
+        notifyNotConnected();
     }
 }
 
+void MainWindow::closeEvent(QCloseEvent* event){
+    isClosed = true;
+}
+
+void MainWindow::notifyNotConnected ()
+{
+    if (this->isClosed) return;
+
+    retryConnection->stop();
+
+    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "Инспектор аэропортов. Ошибка подключени к базе",
+                                                               tr("Хотите попробовать подключиться еще раз?\n"),
+                                                               QMessageBox::Close | QMessageBox::No | QMessageBox::Yes,
+                                                               QMessageBox::Yes);
+    if (resBtn == QMessageBox::Yes)
+    {
+        retryConnection->start();
+    }
+    else if(resBtn == QMessageBox::No)
+    {
+    }
+    else
+    {
+        exit(1);
+    }
+}
 
 void MainWindow::on_pb_search_clicked()
 {
@@ -370,6 +405,8 @@ void MainWindow::on_le_airport_name_textChanged(const QString &arg1)
 }
 
 void MainWindow::monthSelected(int index) {
+
+    //daily_view->hide();
     QString airport = ui->le_airport_name->text();
 
     db_handler->getFlightStatDaily(db_reader, airport, index + 1, true);
@@ -385,11 +422,13 @@ void MainWindow::on_pb_show_load_clicked()
     {
         db_handler->getFlightStatMonthly(db_reader,airport,true);
         db_handler->getFlightStatMonthly(db_reader,airport,false);
+        //monthly_view->hide();
     }
     else if (ui->tabWidget_2->tabText(ui->tabWidget_2->currentIndex()) == "Ежедневно")
     {
         db_handler->getFlightStatDaily(db_reader, airport, monthSelector->currentIndex() + 1, true);
         db_handler->getFlightStatDaily(db_reader, airport, monthSelector->currentIndex() + 1, false);
+        //daily_view->hide();
     }
 }
 
@@ -420,6 +459,8 @@ void MainWindow::initMonthlyChart()
     monthly_chart_axisY = new QValueAxis;
     monthly_chart->addAxis(monthly_chart_axisY, Qt::AlignLeft);
     monthly_arrivals->attachAxis(monthly_chart_axisY);
+
+    ///monthly_view->hide();
 }
 
 
@@ -445,6 +486,8 @@ void MainWindow::initDailyChart()
     daily_chart_axisY = new QValueAxis;
     daily_chart->addAxis(daily_chart_axisY, Qt::AlignLeft);
     daily_arrivals->attachAxis(daily_chart_axisY);
+
+    //daily_view->hide();
 }
 
 void MainWindow::showMonthlyArrivalStats(QList<double>& arrivals_per_month)
@@ -455,6 +498,9 @@ void MainWindow::showMonthlyArrivalStats(QList<double>& arrivals_per_month)
     monthly_chart_axisY->setRange(0, FindMax(arrivals_per_month));
 
     monthly_view->update();
+    monthly_chart->setTitle("Загрузка аэропорта " + ui->le_airport_name->text() + " по месяцам");
+
+    //monthly_view->show();
 }
 
 void MainWindow::showMonthlyDepartureStats(QList<double>& departures_per_month)
@@ -465,6 +511,8 @@ void MainWindow::showMonthlyDepartureStats(QList<double>& departures_per_month)
     monthly_chart_axisY->setRange(0, FindMax(departures_per_month));
 
     monthly_view->update();
+
+    //monthly_view->show();
 }
 
 
@@ -482,7 +530,9 @@ void MainWindow::showDailyArrivalStats(QList<double>& arrivals_per_day)
     }
 
     daily_chart_axisY->setRange(0, FindMax(arrivals_per_day));
+    daily_chart->setTitle("Загрузка аэропорта " + ui->le_airport_name->text() + ". " + monthSelector->itemText(monthSelector->currentIndex()));
     daily_view->update();
+    //daily_view->show();
 }
 
 void MainWindow::showDailyDepartureStats(QList<double>& departures_per_day)
@@ -513,3 +563,4 @@ double MainWindow::FindMax(QList<double>& data)
 
     return max;
 }
+
