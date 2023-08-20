@@ -107,6 +107,8 @@ private:
     bool isClosed = false;
 
     void closeEvent(QCloseEvent* event);
+
+    void setEnabledWidgets(bool flag);
 };
 
 #endif // MAINWINDOW_H

@@ -26,7 +26,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     db_reader = new database_reader;
     connect(db_reader, &database_reader::sig_SendStatusConnection, this, &MainWindow::ReceiveStatusConnectionToDB);
-    db_reader->ConnectToDB();
 
     db_handler = new db_info_handler;
 
@@ -110,12 +109,28 @@ MainWindow::MainWindow(QWidget *parent)
     connect(monthSelector, &QComboBox::currentIndexChanged, this, MainWindow::monthSelected);
 
     connect(retryConnection, &QTimer::timeout, db_reader, &database_reader::ConnectToDB);
+
+    setEnabledWidgets(false);
+
+    db_reader->ConnectToDB();
 }
 
 MainWindow::~MainWindow()
 {
     delete db_reader;
     delete ui;
+}
+
+void MainWindow::setEnabledWidgets(bool flag){
+    ui->pb_search->setEnabled(flag);
+    ui->le_departure->setEnabled(flag);
+    ui->le_destination->setEnabled(flag);
+    ui->le_date->setEnabled(flag);
+
+    ui->le_airport_name->setEnabled(flag);
+    ui->pb_show_load->setEnabled(flag);
+
+    monthSelector->setEnabled(flag);
 }
 
 
@@ -125,11 +140,13 @@ void MainWindow::ReceiveStatusConnectionToDB(bool status)
     {
         status_bar->showMessage("Подключено к базе");
         status_bar->setStyleSheet("color:green");
+        setEnabledWidgets(true);
     }
     else
     {
         status_bar->showMessage("Не подключено к базе");
         status_bar->setStyleSheet("color:red");
+        setEnabledWidgets(false);
         notifyNotConnected();
     }
 }
