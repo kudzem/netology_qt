@@ -113,6 +113,8 @@ MainWindow::MainWindow(QWidget *parent)
     setEnabledWidgets(false);
 
     db_reader->ConnectToDB();
+
+    //ui->le_departure->ver
 }
 
 MainWindow::~MainWindow()
@@ -220,8 +222,30 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
             else if (ui->le_airport_name->hasFocus()) {
                 airportStatList->setFocus();
             }
+            else if (ui->le_date->hasFocus()) {
+                calendar->setFocus();
+            }
         }
-        else //if (keyEvent->key() == Qt::Key_Enter) {
+        else if (keyEvent->key() == Qt::Key_Escape) {
+            if(ui->le_departure->hasFocus() || departList->hasFocus()) {
+                departList->hide();
+                ui->le_departure->setFocus();
+            }
+            else if (ui->le_destination->hasFocus() || destList->hasFocus()) {
+                destList->hide();
+                ui->le_destination->setFocus();
+            }
+            else if (ui->le_airport_name->hasFocus() || airportStatList->hasFocus()) {
+                airportStatList->hide();
+                ui->le_airport_name->setFocus();
+            }
+            else if (ui->le_date->hasFocus() || calendar->hasFocus()) {
+                calendar->hide();
+                ui->le_date->setFocus();
+            }
+
+        }
+        else if (keyEvent->key() == Qt::Key_Return)
         {
             if(departList->hasFocus()) {
                 departure_chosen(departList->currentIndex());
@@ -231,6 +255,9 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
             }
             else if (airportStatList->hasFocus()) {
                 stat_airport_chosen(airportStatList->currentIndex());
+            }
+            else if (calendar->hasFocus()) {
+                date_chosen();
             }
         }
     }
@@ -512,7 +539,7 @@ void MainWindow::showMonthlyArrivalStats(QList<double>& arrivals_per_month)
     arv->remove(0,12);
     arv->append(arrivals_per_month);
 
-    monthly_chart_axisY->setRange(0, FindMax(arrivals_per_month));
+    monthly_chart_axisY->setRange(0, FindMax(arrivals_per_month) + 1);
 
     monthly_view->update();
     monthly_chart->setTitle("Загрузка аэропорта " + ui->le_airport_name->text() + " по месяцам");
@@ -525,7 +552,7 @@ void MainWindow::showMonthlyDepartureStats(QList<double>& departures_per_month)
     dep->remove(0,12);
     dep->append(departures_per_month);
 
-    monthly_chart_axisY->setRange(0, FindMax(departures_per_month));
+    monthly_chart_axisY->setRange(0, FindMax(departures_per_month) + 1);
 
     monthly_view->update();
 
@@ -579,5 +606,35 @@ double MainWindow::FindMax(QList<double>& data)
     }
 
     return max;
+}
+
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    //ui->pushButton_3->setText()
+}
+
+
+void MainWindow::on_tab_functions_currentChanged(int index)
+{
+
+}
+
+
+void MainWindow::on_le_departure_textEdited(const QString &arg1)
+{
+    departList->show();
+}
+
+
+void MainWindow::on_le_destination_textEdited(const QString &arg1)
+{
+    destList->show();
+}
+
+
+void MainWindow::on_le_airport_name_textEdited(const QString &arg1)
+{
+    airportStatList->show();
 }
 

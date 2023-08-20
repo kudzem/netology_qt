@@ -57,6 +57,16 @@ private slots:
 
     void monthSelected(int index);
 
+    void on_pushButton_3_clicked();
+
+    void on_tab_functions_currentChanged(int index);
+
+    void on_le_departure_textEdited(const QString &arg1);
+
+    void on_le_destination_textEdited(const QString &arg1);
+
+    void on_le_airport_name_textEdited(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
 
