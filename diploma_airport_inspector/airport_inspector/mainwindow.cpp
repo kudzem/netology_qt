@@ -59,28 +59,29 @@ MainWindow::MainWindow(QWidget *parent)
     departListModel = new QStringListModel(this);
     departList->setModel(departListModel);
     departList->setGeometry(ui->le_departure->geometry().left(),
-                            ui->le_departure->geometry().bottom() + ui->tab_functions->geometry().bottom(),
+                            ui->le_departure->geometry().bottom() + ui->gridLayout->geometry().top() + ui->tab_functions->geometry().bottom(),
                             ui->le_departure->geometry().width(),
                             10*ui->le_departure->geometry().height());
 
     destListModel = new QStringListModel(this);
     destList->setModel(destListModel);
 
+    ui->le_destination->updateGeometry();
     destList->setGeometry(ui->le_destination->geometry().left() + ui->tab_functions->geometry().left(),
-                            ui->le_destination->geometry().bottom() + ui->tab_functions->geometry().bottom(),
+                            ui->le_destination->geometry().bottom() + ui->gridLayout->geometry().top() + ui->tab_functions->geometry().bottom(),
                             ui->le_destination->geometry().width(),
                             10*ui->le_destination->geometry().height());
 
     airportStatListModel = new QStringListModel(this);
     airportStatList->setModel(airportStatListModel);
 
-    airportStatList->setGeometry(ui->le_airport_name->geometry().left() + ui->tab_functions->geometry().left(),
-                                 ui->le_airport_name->geometry().bottom() + ui->tab_functions->geometry().bottom(),
+    airportStatList->setGeometry(ui->le_airport_name->geometry().left(),
+                                 ui->le_airport_name->geometry().bottom() + ui->gridLayout->geometry().top() + ui->tab_functions->geometry().bottom(),
                                  ui->le_airport_name->geometry().width(),
                                  10*ui->le_airport_name->geometry().height());
 
-    calendar->setGeometry(ui->le_date->geometry().left() + ui->tab_functions->geometry().left(),
-                          ui->le_date->geometry().bottom() + ui->tab_functions->geometry().bottom(),
+    calendar->setGeometry(ui->le_date->geometry().left(),
+                          ui->le_date->geometry().bottom() + ui->gridLayout->geometry().top() + ui->tab_functions->geometry().top(),
                           300,
                           200);
 
@@ -463,13 +464,13 @@ void MainWindow::on_pb_show_load_clicked()
 
     QString airport = ui->le_airport_name->text();
 
-    if (ui->tabWidget_2->tabText(ui->tabWidget_2->currentIndex()) == "Ежемесячно")
+    //if (ui->tabWidget_2->tabText(ui->tabWidget_2->currentIndex()) == "Ежемесячно")
     {
         maxArrivalsPerMonth = 0;
         db_handler->getFlightStatMonthly(db_reader,airport,true);
         db_handler->getFlightStatMonthly(db_reader,airport,false);
     }
-    else if (ui->tabWidget_2->tabText(ui->tabWidget_2->currentIndex()) == "Ежедневно")
+    //else if (ui->tabWidget_2->tabText(ui->tabWidget_2->currentIndex()) == "Ежедневно")
     {
         maxArrivalsPerDay = 0;
         db_handler->getFlightStatDaily(db_reader, airport, monthSelector->currentIndex() + 1, true);
@@ -617,9 +618,24 @@ void MainWindow::on_pushButton_3_clicked()
 
 void MainWindow::on_tab_functions_currentChanged(int index)
 {
-
+    if(ui->tab_functions->currentIndex() == 0)
+    {
+        airportStatList->hide();
+    }
+    else if(ui->tab_functions->currentIndex() == 1)
+    {
+        calendar->hide();
+        departList->hide();
+        destList->hide();
+    }
 }
 
+
+QString MainWindow::capitalize_string(QString s)
+{
+
+    return s;
+}
 
 void MainWindow::on_le_departure_textEdited(const QString &arg1)
 {
@@ -629,12 +645,14 @@ void MainWindow::on_le_departure_textEdited(const QString &arg1)
 
 void MainWindow::on_le_destination_textEdited(const QString &arg1)
 {
+    ui->le_destination->setText(capitalize_string(ui->le_destination->text()));
     destList->show();
 }
 
 
 void MainWindow::on_le_airport_name_textEdited(const QString &arg1)
 {
+    ui->le_airport_name->setText(capitalize_string(ui->le_airport_name->text()));
     airportStatList->show();
 }
 

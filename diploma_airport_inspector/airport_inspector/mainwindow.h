@@ -121,6 +121,8 @@ private:
     void closeEvent(QCloseEvent* event);
 
     void setEnabledWidgets(bool flag);
+
+    QString capitalize_string(QString s);
 };
 
 #endif // MAINWINDOW_H

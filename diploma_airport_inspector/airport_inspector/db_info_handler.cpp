@@ -10,7 +10,15 @@ db_info_handler::db_info_handler(QObject *parent)
 void
 db_info_handler::getAirportListLike(database_reader* db_reader, QString pattern)
 {
-    if (pattern == "Любой") pattern = "";
+    if (pattern == "Любой")
+    {
+        pattern = "";
+    }
+    else if(pattern.size())
+    {
+        pattern[0] = pattern[0].toUpper();
+    }
+
 
     const QString request = "SELECT airport_name->>'ru' as \"airportName\", airport_code FROM bookings.airports_data WHERE airport_name->>'ru' LIKE '" + pattern + "%' ORDER BY airport_name->>'ru'";
 
