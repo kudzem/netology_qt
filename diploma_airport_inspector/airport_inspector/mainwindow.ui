@@ -24,7 +24,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>true</bool>
@@ -36,39 +36,41 @@
        <bool>false</bool>
       </property>
       <widget class="QWidget" name="tab">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <attribute name="title">
         <string>Поиск рейсов</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="2">
-         <widget class="QLineEdit" name="le_destination">
+        <property name="horizontalSpacing">
+         <number>1</number>
+        </property>
+        <item row="1" column="0">
+         <widget class="QLineEdit" name="le_departure">
           <property name="text">
            <string>Любой</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="3">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Когда</string>
+        <item row="2" column="0" colspan="7">
+         <widget class="QTableView" name="tv_flights"/>
+        </item>
+        <item row="1" column="4">
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>16777215</height>
+           </size>
           </property>
-          <property name="buddy">
-           <cstring>le_date</cstring>
+          <property name="text">
+           <string>X</string>
           </property>
          </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Откуда</string>
-          </property>
-          <property name="buddy">
-           <cstring>le_departure</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3">
-         <widget class="QLineEdit" name="le_date"/>
         </item>
         <item row="1" column="1">
          <widget class="QPushButton" name="pushButton">
@@ -92,10 +94,33 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLineEdit" name="le_departure">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Откуда</string>
+          </property>
+          <property name="buddy">
+           <cstring>le_departure</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="le_destination">
           <property name="text">
            <string>Любой</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLineEdit" name="le_date"/>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Когда</string>
+          </property>
+          <property name="buddy">
+           <cstring>le_date</cstring>
           </property>
          </widget>
         </item>
@@ -109,9 +134,6 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0" colspan="7">
-         <widget class="QTableView" name="tv_flights"/>
-        </item>
         <item row="0" column="2">
          <widget class="QLabel" name="label_2">
           <property name="text">
@@ -122,19 +144,6 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="4">
-         <widget class="QPushButton" name="pushButton_2">
-          <property name="maximumSize">
-           <size>
-            <width>24</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>X</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_2">
@@ -142,6 +151,9 @@
         <string>Загрузка аэропорта</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
+        <property name="horizontalSpacing">
+         <number>1</number>
+        </property>
         <item row="2" column="0" colspan="2">
          <widget class="QTabWidget" name="tabWidget_2">
           <property name="currentIndex">

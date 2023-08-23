@@ -36,6 +36,7 @@ private slots:
     void showMonthlyDepartureStats(QVector<double>& departures_per_month);
     void showDailyArrivalStats(QVector<double>& arrivals_per_day);
     void showDailyDepartureStats(QVector<double>& departures_per_day);
+    void putDataToSeries(QVector<double>& data, QLineSeries* series);
 
     void departure_chosen(const QModelIndex& index);
     void destination_chosen(const QModelIndex& index);
@@ -110,7 +111,7 @@ private:
 
     QComboBox* monthSelector;
 
-    double FindMax(QVector<double>& data);
+    double findMax(QVector<double>& data);
 
     void notifyNotConnected();
 
@@ -121,8 +122,6 @@ private:
     void closeEvent(QCloseEvent* event);
 
     void setEnabledWidgets(bool flag);
-
-    QString capitalize_string(QString s);
 };
 
 #endif // MAINWINDOW_H

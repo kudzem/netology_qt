@@ -3,6 +3,7 @@
 
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QtConcurrent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -47,13 +48,11 @@ MainWindow::MainWindow(QWidget *parent)
     calendar->setMinimumDate(QDate(2016, 8, 15));
     calendar->setMaximumDate(QDate(2017, 9, 14));
 
-    //ui->le_date->setText(calendar->selectedDate().toString());
     ui->le_departure->setFocus();
 
     connect(departList, &QListView::clicked, this, &MainWindow::departure_chosen);
     connect(destList, &QListView::clicked, this, &MainWindow::destination_chosen);
     connect(airportStatList, &QListView::clicked, this, &MainWindow::stat_airport_chosen);
-
     connect(calendar, &QCalendarWidget::selectionChanged, this, &MainWindow::date_chosen);
 
     departListModel = new QStringListModel(this);
@@ -67,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent)
     destList->setModel(destListModel);
 
     ui->le_destination->updateGeometry();
-    destList->setGeometry(ui->le_destination->geometry().left() + ui->tab_functions->geometry().left(),
+    destList->setGeometry(ui->le_destination->geometry().left(),
                             ui->le_destination->geometry().bottom() + ui->gridLayout->geometry().top() + ui->tab_functions->geometry().bottom(),
                             ui->le_destination->geometry().width(),
                             10*ui->le_destination->geometry().height());
@@ -81,13 +80,12 @@ MainWindow::MainWindow(QWidget *parent)
                                  10*ui->le_airport_name->geometry().height());
 
     calendar->setGeometry(ui->le_date->geometry().left(),
-                          ui->le_date->geometry().bottom() + ui->gridLayout->geometry().top() + ui->tab_functions->geometry().top(),
+                          ui->le_date->geometry().bottom() + ui->gridLayout->geometry().top() + ui->tab_functions->geometry().bottom(),
                           300,
                           200);
 
     connect(db_handler, &db_info_handler::sig_sendAirportList, this, &MainWindow::showAirportList);
     connect(db_handler, &db_info_handler::sig_sendFlightList, this, &MainWindow::showRelevantFlights);
-
 
     initMonthlyChart();
     initDailyChart();
@@ -98,7 +96,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lo_for_chart->addWidget(monthly_view);
     ui->lo_for_daily->addWidget(daily_view);
 
-
     QStringList months = {"Январь", "Ферваль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" };
     monthSelector->addItems(months);
 
@@ -108,14 +105,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(db_handler, &db_info_handler::sig_sendDayArrivalStat, this, MainWindow::showDailyArrivalStats);
 
     connect(monthSelector, &QComboBox::currentIndexChanged, this, MainWindow::monthSelected);
-
     connect(retryConnection, &QTimer::timeout, db_reader, &database_reader::ConnectToDB);
 
     setEnabledWidgets(false);
 
-    db_reader->ConnectToDB();
-
-    //ui->le_departure->ver
+    auto cf = [this] () { this->db_reader->ConnectToDB(); };
+    QtConcurrent::run(cf);
 }
 
 MainWindow::~MainWindow()
@@ -188,16 +183,20 @@ void MainWindow::on_pb_search_clicked()
 
     if (ui->le_date->text() != "")
     {
+        QtConcurrent::run( [&] () {
         db_handler->getFlights(db_reader,
                                departureAirport,
                                destinationAirport,
                                calendar->selectedDate());
+        } );
     }
     else
     {
-        db_handler->getFlights(db_reader,
-                               departureAirport,
-                               destinationAirport);
+        QtConcurrent::run( [&] () {
+            db_handler->getFlights(db_reader,
+                                   departureAirport,
+                                   destinationAirport);
+        } );
     }
 }
 
@@ -268,10 +267,6 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         {
             QString airport = ui->le_airport_name->text();
 
-            if(airport == "Любой") {
-                airport = "";
-            }
-
             if (ui->le_airport_name->text() == "Любой") {
                 ui->le_airport_name->setText("");
             }
@@ -282,9 +277,6 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         else if(watched == ui->le_departure || watched == departList)
         {
             QString airport = ui->le_departure->text();
-            if(airport == "Любой") {
-                airport = "";
-            }
 
             if (ui->le_departure->text() == "Любой") {
                 ui->le_departure->setText("");
@@ -297,9 +289,6 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         else if(watched == ui->le_destination || watched == destList)
         {
             QString airport = ui->le_destination->text();
-            if(airport == "Любой") {
-                airport = "";
-            }
 
             if (ui->le_destination->text() == "Любой") {
                 ui->le_destination->setText("");
@@ -380,12 +369,6 @@ void MainWindow::showRelevantFlights(QAbstractItemModel *model)
     ui->tv_flights->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tv_flights->setModel(model);
     ui->tv_flights->show();
-
-    // faster alternative to hide columns
-    //    ui->tv_result->setColumnHidden(0,true);
-    //    for(int i=3; i <=14 ; ++i) {
-    //    ui->tv_result->setColumnHidden(3,true);
-    //    }
 }
 
 void MainWindow::departure_chosen(const QModelIndex& index) {
@@ -449,9 +432,8 @@ void MainWindow::on_le_airport_name_textChanged(const QString &arg1)
     db_handler->getAirportListLike(db_reader, destinationTo);
 }
 
-void MainWindow::monthSelected(int index) {
-
-    //daily_view->hide();
+void MainWindow::monthSelected(int index)
+{
     QString airport = ui->le_airport_name->text();
 
     db_handler->getFlightStatDaily(db_reader, airport, index + 1, true);
@@ -467,8 +449,9 @@ void MainWindow::on_pb_show_load_clicked()
     //if (ui->tabWidget_2->tabText(ui->tabWidget_2->currentIndex()) == "Ежемесячно")
     {
         maxArrivalsPerMonth = 0;
-        db_handler->getFlightStatMonthly(db_reader,airport,true);
-        db_handler->getFlightStatMonthly(db_reader,airport,false);
+
+        db_handler->getFlightStatMonthly(db_reader, airport, true);
+        db_handler->getFlightStatMonthly(db_reader, airport, false);
     }
     //else if (ui->tabWidget_2->tabText(ui->tabWidget_2->currentIndex()) == "Ежедневно")
     {
@@ -477,7 +460,6 @@ void MainWindow::on_pb_show_load_clicked()
         db_handler->getFlightStatDaily(db_reader, airport, monthSelector->currentIndex() + 1, false);
     }
 }
-
 
 void MainWindow::initMonthlyChart()
 {
@@ -542,7 +524,7 @@ void MainWindow::showMonthlyArrivalStats(QVector<double>& arrivals_per_month)
     arv->append(arrivals_per_month);
 
     monthly_view->update();
-    maxArrivalsPerMonth = FindMax(arrivals_per_month);
+    maxArrivalsPerMonth = findMax(arrivals_per_month);
     monthly_chart->setTitle("Загрузка аэропорта " + ui->le_airport_name->text() + " по месяцам");
 }
 
@@ -551,53 +533,45 @@ void MainWindow::showMonthlyDepartureStats(QVector<double>& departures_per_month
     dep->remove(0,12);
     dep->append(departures_per_month);
 
-    double maxDeparturesPerMonth = FindMax(departures_per_month);
+    double maxDeparturesPerMonth = findMax(departures_per_month);
     monthly_chart_axisY->setRange(0,  std::max(maxDeparturesPerMonth, maxArrivalsPerMonth) + 1);
 
     monthly_view->update();
 }
 
 
-void MainWindow::showDailyArrivalStats(QVector<double>& arrivals_per_day)
+void MainWindow::putDataToSeries(QVector<double>& data, QLineSeries* series)
 {
-    daily_arrivals->clear();
-
-    size_t s = arrivals_per_day.size();
+    series->clear();
 
     int i = 0;
-    foreach(double num, arrivals_per_day)
+    foreach(double num, data)
     {
-        daily_arrivals->append(i+1, arrivals_per_day[i]);
+        series->append(i+1, num);
         ++i;
     }
+}
 
+void MainWindow::showDailyArrivalStats(QVector<double>& arrivals_per_day)
+{
+    putDataToSeries(arrivals_per_day, daily_arrivals);
     daily_chart_axisX->setRange(1, arrivals_per_day.size());
-    maxArrivalsPerDay = FindMax(arrivals_per_day);
+    maxArrivalsPerDay = findMax(arrivals_per_day);
     daily_chart->setTitle("Загрузка аэропорта " + ui->le_airport_name->text() + ". " + monthSelector->itemText(monthSelector->currentIndex()));
     daily_view->update();
 }
 
 void MainWindow::showDailyDepartureStats(QVector<double>& departures_per_day)
 {
-    daily_departures->clear();
-
-    size_t s = departures_per_day.size();
-
-    int i = 0;
-    foreach(double num, departures_per_day)
-    {
-        daily_departures->append(i+1, departures_per_day[i]);
-        ++i;
-    }
-
+    putDataToSeries(departures_per_day, daily_departures);
     daily_chart_axisX->setRange(1, departures_per_day.size());
 
-    double maxDeparturesPerDay = FindMax(departures_per_day);
+    double maxDeparturesPerDay = findMax(departures_per_day);
     daily_chart_axisY->setRange(0,  std::max(maxDeparturesPerDay, maxArrivalsPerDay) + 1);
     daily_view->update();
 }
 
-double MainWindow::FindMax(QVector<double>& data)
+double MainWindow::findMax(QVector<double>& data)
 {
     double max = 0;
     foreach (double num, data){
@@ -608,13 +582,6 @@ double MainWindow::FindMax(QVector<double>& data)
 
     return max;
 }
-
-
-void MainWindow::on_pushButton_3_clicked()
-{
-    //ui->pushButton_3->setText()
-}
-
 
 void MainWindow::on_tab_functions_currentChanged(int index)
 {
@@ -630,29 +597,18 @@ void MainWindow::on_tab_functions_currentChanged(int index)
     }
 }
 
-
-QString MainWindow::capitalize_string(QString s)
-{
-
-    return s;
-}
-
 void MainWindow::on_le_departure_textEdited(const QString &arg1)
 {
     departList->show();
 }
 
-
 void MainWindow::on_le_destination_textEdited(const QString &arg1)
 {
-    ui->le_destination->setText(capitalize_string(ui->le_destination->text()));
     destList->show();
 }
 
-
 void MainWindow::on_le_airport_name_textEdited(const QString &arg1)
 {
-    ui->le_airport_name->setText(capitalize_string(ui->le_airport_name->text()));
     airportStatList->show();
 }
 
