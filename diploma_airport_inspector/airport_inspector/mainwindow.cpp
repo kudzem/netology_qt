@@ -141,6 +141,7 @@ void MainWindow::ReceiveStatusConnectionToDB(bool status)
         status_bar->showMessage("Подключено к базе");
         status_bar->setStyleSheet("color:green");
         setEnabledWidgets(true);
+        db_handler->getAllAirports(db_reader);
     }
     else
     {

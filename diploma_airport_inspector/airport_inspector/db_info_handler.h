@@ -12,6 +12,12 @@ class db_info_handler : public QObject
 public:
     explicit db_info_handler(QObject *parent = nullptr);
 
+    void getAllAirports(database_reader* db_reader);
+
+    void getAirportListLikeFromDB(database_reader* db_reader, QString pattern);
+
+    void getAirportListLikeInternally(database_reader* db_reader, QString pattern);
+
     void getAirportListLike(database_reader* db_reader, QString pattern);
 
     void getFlights(database_reader* db_reader,
@@ -43,6 +49,8 @@ signals:
 
 private:
     QVector<QString> airports;
+    QStringList all_airports;
+    bool airport_list_fetched;
 
     static const QString requestToCountMonthlyDepartures;
     static const QString requestToCountMonthlyArrivals;

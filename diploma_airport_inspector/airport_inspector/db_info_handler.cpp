@@ -4,11 +4,28 @@
 db_info_handler::db_info_handler(QObject *parent)
     : QObject{parent}
 {
-
+    airport_list_fetched = false;
 }
 
 void
-db_info_handler::getAirportListLike(database_reader* db_reader, QString pattern)
+db_info_handler::getAllAirports(database_reader* db_reader)
+{
+    const QString request = "SELECT airport_name->>'ru' as \"airportName\", airport_code FROM bookings.airports_data ORDER BY airport_name->>'ru'";
+
+    //qDebug() << request;
+    QSqlQuery* airportList = db_reader->requestRawQuery(request);
+
+    while(airportList->next()){
+        QString v0 = airportList->value(0).toString();
+        //qDebug() << v0;
+        all_airports << v0;
+    }
+
+    airport_list_fetched = true;
+}
+
+void
+db_info_handler::getAirportListLikeFromDB(database_reader* db_reader, QString pattern)
 {
     if (pattern == "Любой")
     {
@@ -34,6 +51,49 @@ db_info_handler::getAirportListLike(database_reader* db_reader, QString pattern)
     }
 
     emit sig_sendAirportList(airports);
+}
+
+void
+db_info_handler::getAirportListLikeInternally(database_reader* db_reader, QString pattern)
+{
+    if (pattern == "Любой")
+    {
+        pattern = "";
+        emit sig_sendAirportList(all_airports);
+        return;
+    }
+
+    if(pattern.size())
+    {
+        pattern[0] = pattern[0].toUpper();
+    }
+
+    QStringList airports;
+
+
+    QString airport;
+    foreach (airport, all_airports)
+    {
+        if (airport.startsWith(pattern))
+        {
+            airports << airport;
+        }
+    }
+
+    emit sig_sendAirportList(airports);
+}
+
+void
+db_info_handler::getAirportListLike(database_reader* db_reader, QString pattern)
+{
+    if (airport_list_fetched)
+    {
+        getAirportListLikeInternally(db_reader, pattern);
+    }
+    else
+    {
+        getAirportListLikeFromDB(db_reader, pattern);
+    }
 }
 
 void
