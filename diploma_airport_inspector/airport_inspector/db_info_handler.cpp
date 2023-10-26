@@ -22,14 +22,14 @@ db_info_handler::getAirportListLike(database_reader* db_reader, QString pattern)
 
     const QString request = "SELECT airport_name->>'ru' as \"airportName\", airport_code FROM bookings.airports_data WHERE airport_name->>'ru' LIKE '" + pattern + "%' ORDER BY airport_name->>'ru'";
 
-    qDebug() << request;
+    //qDebug() << request;
     QSqlQuery* airportList = db_reader->requestRawQuery(request);
 
     QStringList airports;
 
     while(airportList->next()){
         QString v0 = airportList->value(0).toString();
-        qDebug() << v0;
+        //qDebug() << v0;
         airports << v0;
     }
 
@@ -54,8 +54,8 @@ db_info_handler::getFlights(database_reader* db_reader,
                              AND CAST(scheduled_departure as DATE) = '" + date.toString("yyyy-MM-dd") + "' \
                              ORDER BY scheduled_departure";
 
-    qDebug() << request;
-    qDebug() << date.toString("yyyy-MM-dd");
+    //qDebug() << request;
+    //qDebug() << date.toString("yyyy-MM-dd");
 
     QSqlQueryModel* flightList = db_reader->requestModelQuery(request);
 
@@ -84,7 +84,7 @@ db_info_handler::getFlights(database_reader* db_reader,
                              AND arrival.airport_name->>'ru' LIKE '%" + destination + "' \
                              ORDER BY scheduled_departure";
 
-    qDebug() << request;
+    //qDebug() << request;
 
     QSqlQueryModel* flightList = db_reader->requestModelQuery(request);
 
@@ -157,10 +157,10 @@ db_info_handler::getFlightStatMonthly(database_reader* db_reader,
 
     request = request.replace(QString("AIRPORT_PATTERN_TO_REPLACE"), airportName);
 
-    qDebug() << request;
+    //qDebug() << request;
     QSqlQuery* airportList = db_reader->requestRawQuery(request);
 
-    qDebug() << airportList->lastError();
+    //qDebug() << airportList->lastError();
 
     QVector<double> stats;
     stats.resize(12);
@@ -168,7 +168,7 @@ db_info_handler::getFlightStatMonthly(database_reader* db_reader,
     while(airportList->next()){
         int flightsPerMonth = airportList->value(0).toInt();
         int month = airportList->value(1).toInt();
-        qDebug() << flightsPerMonth;
+        //qDebug() << flightsPerMonth;
         stats[month-1] = flightsPerMonth;
     }
 
@@ -205,10 +205,10 @@ db_info_handler::getFlightStatDaily(database_reader* db_reader,
     request = request.replace(QString("AIRPORT_PATTERN_TO_REPLACE"), airportName);
     request = request.replace(QString("MONTH_PATTERN_TO_REPLACE"), QString::number(month));
 
-    qDebug() << request;
+    //qDebug() << request;
     QSqlQuery* airportList = db_reader->requestRawQuery(request);
 
-    qDebug() << airportList->lastError();
+    //qDebug() << airportList->lastError();
 
     QVector<double> stats;
     stats.resize(31);
@@ -216,7 +216,7 @@ db_info_handler::getFlightStatDaily(database_reader* db_reader,
     while(airportList->next()){
         int flightsPerDay = airportList->value(0).toInt();
         int day = airportList->value(1).toInt();
-        qDebug() << flightsPerDay;
+        //qDebug() << flightsPerDay;
         stats[day-1] = flightsPerDay;
     }
 
