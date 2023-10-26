@@ -48,6 +48,8 @@ MainWindow::MainWindow(QWidget *parent)
     calendar->setMinimumDate(QDate(2016, 8, 15));
     calendar->setMaximumDate(QDate(2017, 9, 14));
 
+    ui->tab_functions->setCurrentWidget(ui->tab);
+
     ui->le_departure->setFocus();
 
     connect(departList, &QListView::clicked, this, &MainWindow::departure_chosen);
